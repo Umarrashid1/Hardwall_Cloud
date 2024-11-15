@@ -41,7 +41,7 @@ wss.on('connection', (ws) => {
 
             // After receiving the message, call the Python script to process files
             // Define the directory path to pass to the Python script
-            const directoryPath = 'model/feature_extraction.py'; // Adjust this to your actual directory path
+            const directoryPath = 'model/test'; // Adjust this to your actual directory path
 
             // Run the Python script using spawn with python3
             const pythonProcess = spawn('python3', ['model/feature_extraction.py', directoryPath]);
