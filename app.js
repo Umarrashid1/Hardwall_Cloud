@@ -85,31 +85,4 @@ server.on('upgrade', (request, socket, head) => {
     });
 });
 
-// FTP server setup
-const ftpServer = new FtpSrv({
-    url: `ftp://${ipAddress}:21`,  // Set FTP server URL to bind to the specific IP
-    anonymous: true,  // Allows anonymous login (you can customize this as needed)
-    pasv: {
-        min: 10000,
-        max: 10100
-    }
-});
-
-// Handle FTP login
-ftpServer.on('login', (data, resolve, reject) => {
-    console.log('FTP login attempt:', data);
-    // Here you can handle login and authenticate users if necessary
-    if (data.username === 'anonymous') {
-        resolve({ root: '/path/to/ftp/root' }); // Path to the root directory for FTP access
-    } else {
-        reject(new Error('Invalid username or password'));
-    }
-});
-
-// Start the FTP server
-ftpServer.listen().then(() => {
-    console.log(`FTP server running at ftp://${ipAddress}:21`);
-}).catch(err => {
-    console.error('Error starting FTP server:', err);
-});
 
