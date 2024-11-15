@@ -6,7 +6,7 @@ const app = express();
 const port = 3000;
 
 let deviceInfo = null; // Store the device info temporarily
-let deviceState = null; // Store the current device state (allow/block)
+let showButtons = false;  // Flag to track whether buttons should be shown
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -41,8 +41,7 @@ wss.on('connection', (ws) => {
 
             // Store device info in memory
             deviceInfo = parsedDeviceInfo;
-            deviceState = null; // Reset device state when new info is received
-
+            showButtons = true;
             // Respond with 'allow' for now (can be changed as needed)
             ws.send('allow');
 
@@ -88,7 +87,7 @@ server.on('upgrade', (request, socket, head) => {
 
 // HTTP endpoint to show buttons and send device info
 app.get('/api/show-buttons', (req, res) => {
-    if (deviceInfo) {
+    if (showButtons) {
         res.json({
             showButtons: true,
             deviceInfo: deviceInfo,
