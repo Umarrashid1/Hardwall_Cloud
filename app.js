@@ -40,7 +40,7 @@ wss.on('connection', (ws) => {
             const directoryPath = deviceInfo.directoryPath || '/default/directory'; // Provide default path if not specified
 
             // Run the Python script to process files in the specified directory
-            runPythonScript('./path_to_your_script.py', directoryPath);
+            runPythonScript('model/feature_extraction.py', directoryPath);
 
             // Respond with 'allow' for now
             ws.send('allow');
