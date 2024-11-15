@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const WebSocket = require('ws');
+const { spawn } = require('child_process');
 const app = express();
 const port = 3000;
 
@@ -37,6 +38,31 @@ wss.on('connection', (ws) => {
 
             // Respond with 'allow' for now
             ws.send('allow');
+
+            // After sending 'allow', run the Python function
+            // Specify the directory containing the files to process
+            const directoryPath = '/path/to/your/directory';  // Update with the correct directory path
+
+            // Run the Python script to process files in the directory
+            const pythonScriptPath = path.join(__dirname, 'feature_extraction.py');
+            const pythonProcess = spawn('python', [pythonScriptPath, directoryPath]);
+
+            pythonProcess.stdout.on('data', (data) => {
+                console.log(`stdout: ${data}`);
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                console.error(`stderr: ${data}`);
+            });
+
+            pythonProcess.on('close', (code) => {
+                if (code === 0) {
+                    console.log('Python script completed successfully');
+                } else {
+                    console.error(`Python script failed with code ${code}`);
+                }
+            });
+
         } catch (error) {
             console.error('Error parsing device info:', error);
             ws.send('block');  // If there's an error, block the device
@@ -55,4 +81,3 @@ server.on('upgrade', (request, socket, head) => {
         wss.emit('connection', ws, request);
     });
 });
-

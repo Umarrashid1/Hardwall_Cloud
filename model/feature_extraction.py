@@ -56,8 +56,9 @@ def extract_features(file_path):
         print(f"Error processing {file_path}: {e}")
         return None
 
-def process_files_in_directory(directory_path, output_file):
+def process_files_in_directory(directory_path):
     data = []
+    output_file = 'extracted_features.csv'
     for file_name in os.listdir(directory_path):
         # Process files with .exe and .bin extensions
         if file_name.endswith(('.exe', '.bin')):
@@ -75,7 +76,4 @@ def process_files_in_directory(directory_path, output_file):
         print(f"No features extracted from files in {directory_path}")
         return None
 
-if __name__ == "__main__":
-    directory_path = '/home/ubuntu/Desktop/P5-Hardwall/MalwareClassifier/INFECTED/exe_files'
-    output_file = 'extracted_features.csv'
-    process_files_in_directory(directory_path, output_file)
+
