@@ -2,8 +2,13 @@ const express = require('express');
 const path = require('path');
 const WebSocket = require('ws');
 const { spawn } = require('child_process'); // This will allow us to run Python scripts
+const FtpSrv = require('ftp-srv'); // Import the FTP server
+const os = require('os'); // To get the machine's IP address
 const app = express();
 const port = 3000;
+
+// Get the machine's IP address (update this if necessary)
+const ipAddress = '130.225.37.50';  // Set your actual IP address
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -13,7 +18,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start the server
+// Start the Express server
 const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
@@ -79,3 +84,32 @@ server.on('upgrade', (request, socket, head) => {
         wss.emit('connection', ws, request);
     });
 });
+
+// FTP server setup
+const ftpServer = new FtpSrv({
+    url: `ftp://${ipAddress}:21`,  // Set FTP server URL to bind to the specific IP
+    anonymous: true,  // Allows anonymous login (you can customize this as needed)
+    pasv: {
+        min: 10000,
+        max: 10100
+    }
+});
+
+// Handle FTP login
+ftpServer.on('login', (data, resolve, reject) => {
+    console.log('FTP login attempt:', data);
+    // Here you can handle login and authenticate users if necessary
+    if (data.username === 'anonymous') {
+        resolve({ root: '/path/to/ftp/root' }); // Path to the root directory for FTP access
+    } else {
+        reject(new Error('Invalid username or password'));
+    }
+});
+
+// Start the FTP server
+ftpServer.listen().then(() => {
+    console.log(`FTP server running at ftp://${ipAddress}:21`);
+}).catch(err => {
+    console.error('Error starting FTP server:', err);
+});
+
