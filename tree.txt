@@ -1,0 +1,40 @@
+Tror at vi ender ud i at filstrukturen skal se lidt ud som det her:
+
+Volume serial number is A2E4-E06E
+SRC
+├───featextract
+│   └───k8s
+├───frontend
+│   └───k8s
+└───hid-ml
+    └───k8s
+src:
+¦   
+¦   
++---featextract
+¦   ¦   Dockerfile
+¦   ¦   package.json
+¦   ¦   server.js
+¦   ¦   
+¦   +---k8s
+¦           deployment.yml
+¦           service.yml
+¦           
++---frontend
+¦   ¦   Dockerfile
+¦   ¦   package.json
+¦   ¦   server.js
+¦   ¦   
+¦   +---k8s
+¦           deployment.yml
+¦           service.yml
+¦           
++---hid-ml
+    ¦   Dockerfile
+    ¦   package.json
+    ¦   server.js
+    ¦   
+    +---k8s
+            deployment.yml
+            service.yml
+            
