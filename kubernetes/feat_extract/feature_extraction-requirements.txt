@@ -1,0 +1,5 @@
+pandas
+pefile
+hashlib
+os
+pickle
