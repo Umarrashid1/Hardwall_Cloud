@@ -1,39 +1,102 @@
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
+    font-family: Arial, sans-serif;
     padding: 0;
-    background-color: #f4f4f4;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+.container {
+    max-width: 100%; /* Ensure it never exceeds the viewport width */
+    overflow: hidden; /* Hides overflow (e.g., content or images) */
 }
 
-header {
+header, footer {
     background-color: #333;
     color: white;
-    padding: 10px 0;
     text-align: center;
+    padding: 1rem;
+    height: 80px;
 }
 
 main {
-    text-align: center;
-    margin: 20px;
+    padding: 1rem;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #28a745;
+.outputWindowLabel{
+    border-color: #333333;
+    border-width: thick;
+    border-style: solid;
+    border-radius: 2px;
+
+}
+#outputWindow {
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Arrange items vertically */
+    gap: 20px; /* Add spacing between the child elements */
+}
+
+#topPanel {
+    flex-direction: column;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.topButton{
+    background-color: #444;
     color: white;
     border: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #218838;
-}
-
-footer {
+    padding: 10px;
+    margin: 5px 0;
     text-align: center;
-    margin-top: 30px;
-    font-size: 14px;
-    color: #555;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    height: 80px;
+    width: 30%;
+
 }
 
+/* Sidebar Styling */
+#sidePanel {
+    width: 200px;
+    background-color: #333;
+    position: absolute; /* Make the sidebar independent of the main flow */
+    top: 110px; /* Position it below the header (assuming header is 60px tall) */
+    left: 0; /* Keep it on the left side */
+    bottom: 0; /* Ensure it stretches to the bottom */
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.sideButton {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin: 5px 0;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.sideButton:hover {
+    background-color: #555;
+}
+.topButton:hover {
+    background-color: #555;
+}
+
+/* Main Content Styling */
+main {
+    margin-left: 220px; /* Space for the sidebar */
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+
+
+div, p, span {
+    word-wrap: break-word; /* Breaks words if necessary */
+    white-space: normal; /* Allows text to wrap normally */
+}

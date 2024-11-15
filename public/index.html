@@ -3,24 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple UI</title>
+    <title>Simple UI with Side Panel</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Project</h1>
-    </header>
+<header>
+    <h1>HARDWALL</h1>
+</header>
 
-    <main>
-        <button id="clickMe">Click Me!</button>
-        <p id="message"></p>
-    </main>
+<!-- Side Panel -->
+<div id="sidePanel">
+    <button class="sideButton" id="homeButton">Home</button>
+    <button class="sideButton" id="aboutButton">About</button>
+    <button class="sideButton" id="contactButton">Contact</button>
+</div>
 
-    <footer>
-        <p>&copy; 2024 My Project</p>
-    </footer>
+<!-- Main Content -->
+<main>
+    <!-- Top Panel Buttons -->
+    <div id="topPanel">
+        <button class="topButton" id="blockButton">BLOCK</button>
+        <button class="topButton" id="allowButton">ALLOW</button>
+        <button class="topButton" id="configureButton">CONFIGURE</button>
+    </div>
 
-    <script src="script.js"></script>
+    <!-- Output Window -->
+    <div id="outputWindow">
+        <label id="deviceStatus">
+            Device Status: <span id="deviceStatusText"></span>
+        </label>
+
+        <label id="outputWindowLabel">
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        </label>
+    </div>
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>
-
