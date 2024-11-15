@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const WebSocket = require('ws');
-const { spawn } = require('child_process');
+const { spawn } = require('child_process'); // To spawn a Python process
 const app = express();
 const port = 3000;
 
@@ -36,33 +36,14 @@ wss.on('connection', (ws) => {
             const deviceInfo = JSON.parse(messageString);
             console.log('Device info:', deviceInfo);
 
+            // Assuming deviceInfo contains the directory path where files need to be processed
+            const directoryPath = deviceInfo.directoryPath || '/default/directory'; // Provide default path if not specified
+
+            // Run the Python script to process files in the specified directory
+            runPythonScript('./path_to_your_script.py', directoryPath);
+
             // Respond with 'allow' for now
             ws.send('allow');
-
-            // After sending 'allow', run the Python function
-            // Specify the directory containing the files to process
-            const directoryPath = '/path/to/your/directory';  // Update with the correct directory path
-
-            // Run the Python script to process files in the directory
-            const pythonScriptPath = path.join(__dirname, 'feature_extraction.py');
-            const pythonProcess = spawn('python', [pythonScriptPath, directoryPath]);
-
-            pythonProcess.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
-            });
-
-            pythonProcess.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-            });
-
-            pythonProcess.on('close', (code) => {
-                if (code === 0) {
-                    console.log('Python script completed successfully');
-                } else {
-                    console.error(`Python script failed with code ${code}`);
-                }
-            });
-
         } catch (error) {
             console.error('Error parsing device info:', error);
             ws.send('block');  // If there's an error, block the device
@@ -72,7 +53,6 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log('Pi disconnected');
     });
-
 });
 
 // Upgrade HTTP server to WebSocket server
@@ -81,3 +61,20 @@ server.on('upgrade', (request, socket, head) => {
         wss.emit('connection', ws, request);
     });
 });
+
+// Function to run the Python script
+function runPythonScript(scriptPath, directoryPath) {
+    const pythonProcess = spawn('python', [scriptPath, directoryPath]);
+
+    pythonProcess.stdout.on('data', (data) => {
+        console.log(`Python script output: ${data}`);
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`Python script error: ${data}`);
+    });
+
+    pythonProcess.on('close', (code) => {
+        console.log(`Python script finished with code ${code}`);
+    });
+}
