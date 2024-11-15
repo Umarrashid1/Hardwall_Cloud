@@ -3,6 +3,7 @@ import pefile
 import hashlib
 import os
 import sys  # Import sys to access command-line arguments
+import predict_new_samples
 
 
 def extract_features(file_path):
@@ -84,3 +85,5 @@ if __name__ == "__main__":
     # Get the directory path from command-line arguments
     directory_path = sys.argv[1]
     process_files_in_directory(directory_path)
+    predict_new_samples.scan()
+
