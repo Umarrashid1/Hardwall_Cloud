@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const WebSocket = require('ws');
-const { spawn } = require('child_process');
+const { spawn } = require('child_process'); // This will allow us to run Python scripts
 const app = express();
 const port = 3000;
 
@@ -39,28 +39,26 @@ wss.on('connection', (ws) => {
             // Respond with 'allow' for now
             ws.send('allow');
 
-            // After sending 'allow', run the Python function
-            // Specify the directory containing the files to process
-            const directoryPath = '/path/to/your/directory';  // Update with the correct directory path
+            // After receiving the message, call the Python script to process files
+            // Define the directory path to pass to the Python script
+            const directoryPath = 'model/test'; // Adjust this to your actual directory path
 
-            // Run the Python script to process files in the directory
-            const pythonScriptPath = path.join(__dirname, 'feature_extraction.py');
-            const pythonProcess = spawn('python', [pythonScriptPath, directoryPath]);
+            // Run the Python script using spawn with python3
+            const pythonProcess = spawn('python3', ['model/feature_extraction.py', directoryPath]);
 
+            // Handle output from the Python script
             pythonProcess.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
+                console.log(`Python script output: ${data}`);
             });
 
+            // Handle any errors from the Python script
             pythonProcess.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
+                console.error(`Python script error: ${data}`);
             });
 
+            // Handle the end of the Python script execution
             pythonProcess.on('close', (code) => {
-                if (code === 0) {
-                    console.log('Python script completed successfully');
-                } else {
-                    console.error(`Python script failed with code ${code}`);
-                }
+                console.log(`Python script finished with exit code ${code}`);
             });
 
         } catch (error) {

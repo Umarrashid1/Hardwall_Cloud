@@ -2,6 +2,9 @@ import pandas as pd
 import pefile
 import hashlib
 import os
+import sys  # Import sys to access command-line arguments
+import predict_new_samples
+
 
 def extract_features(file_path):
     try:
@@ -56,6 +59,7 @@ def extract_features(file_path):
         print(f"Error processing {file_path}: {e}")
         return None
 
+
 def process_files_in_directory(directory_path):
     data = []
     output_file = 'extracted_features.csv'
@@ -66,7 +70,7 @@ def process_files_in_directory(directory_path):
             features = extract_features(file_path)
             if features is not None:
                 data.append(features)
-    
+
     if data:
         df = pd.DataFrame(data)
         df.to_csv(output_file, index=False)
@@ -76,4 +80,10 @@ def process_files_in_directory(directory_path):
         print(f"No features extracted from files in {directory_path}")
         return None
 
+
+if __name__ == "__main__":
+    # Get the directory path from command-line arguments
+    directory_path = sys.argv[1]
+    process_files_in_directory(directory_path)
+    predict_new_samples.scan()
 
