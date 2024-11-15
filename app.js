@@ -1,14 +1,12 @@
 const express = require('express');
 const path = require('path');
 const WebSocket = require('ws');
-const { spawn } = require('child_process'); // This will allow us to run Python scripts
-const FtpSrv = require('ftp-srv'); // Import the FTP server
-const os = require('os'); // To get the machine's IP address
+const { spawn } = require('child_process'); // To run Python scripts
 const app = express();
 const port = 3000;
 
-// Get the machine's IP address (update this if necessary)
-const ipAddress = '130.225.37.50';  // Set your actual IP address
+let deviceInfo = null; // Store the device info temporarily
+let deviceState = null; // Store the current device state (allow/block)
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -38,14 +36,17 @@ wss.on('connection', (ws) => {
 
         // Attempt to parse the incoming message as JSON
         try {
-            const deviceInfo = JSON.parse(messageString);
-            console.log('Device info:', deviceInfo);
+            const parsedDeviceInfo = JSON.parse(messageString);
+            console.log('Device info:', parsedDeviceInfo);
 
-            // Respond with 'allow' for now
+            // Store device info in memory
+            deviceInfo = parsedDeviceInfo;
+            deviceState = null; // Reset device state when new info is received
+
+            // Respond with 'allow' for now (can be changed as needed)
             ws.send('allow');
 
             // After receiving the message, call the Python script to process files
-            // Define the directory path to pass to the Python script
             const directoryPath = 'model/test'; // Adjust this to your actual directory path
 
             // Run the Python script using spawn with python3
@@ -85,4 +86,32 @@ server.on('upgrade', (request, socket, head) => {
     });
 });
 
+// HTTP endpoint to show buttons and send device info
+app.get('/api/show-buttons', (req, res) => {
+    if (deviceInfo) {
+        res.json({
+            showButtons: true,
+            deviceInfo: deviceInfo,
+        });
+    } else {
+        res.json({ showButtons: false });
+    }
+});
 
+// Endpoint to handle "block" action
+app.post('/api/block', (req, res) => {
+    console.log('Device blocked');
+    deviceState = 'block';  // Block the device
+
+    // Respond to frontend
+    res.json({ message: 'Device blocked successfully' });
+});
+
+// Endpoint to handle "allow" action
+app.post('/api/allow', (req, res) => {
+    console.log('Device allowed');
+    deviceState = 'allow';  // Allow the device
+
+    // Respond to frontend
+    res.json({ message: 'Device allowed successfully' });
+});
