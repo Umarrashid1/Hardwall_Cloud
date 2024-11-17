@@ -5,6 +5,9 @@ const { spawn } = require('child_process'); // To run Python scripts
 const app = express();
 const port = 3000;
 const axios = require('axios');
+const fs = require('fs');
+const FormData = require('form-data');
+
 
 let deviceInfo = null; // Store the device info temporarily
 let showButtons = false;  // Flag to track whether buttons should be shown
@@ -25,26 +28,67 @@ const server = app.listen(port, () => {
 // Set up WebSocket server to communicate with the Pi
 const wss = new WebSocket.Server({ noServer: true });
 
-// Function to handle file upload
-async function postFileTest() {
-    const formData = new FormData();
-    formData.append('file', fs.createReadStream(fileInput.files[0].path));
-    formData.append('fileName', fileInput.files[0].name);
+async function postFile(fileInput) {
+    var formData = new FormData();
+    fileInput.files.forEach(file => {
+        formData.append('file', file.stream, file.data, file.fileName);
+
+    });
+    
+
     try {
-        const response = await axios.post('http://flask-app:5000/extract_features', formData, {
+        const response = await axios.post('http://0.0.0.0:5000/extract_features', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+                'Content-Type': 'multipart/form-data',
+                ...formData.getHeaders()
+            },
+            timeout: 60000  // Increase timeout to 60 seconds
         });
-        if (response.data.message === 'success') {
-            console.log('File uploaded successfully');
-        } else {
-            console.error('Failed to upload file');
-        }
+        //console.log('Response:', response.data);
+        return response.data;
     } catch (error) {
-        console.error('Error uploading file:', error);
+        console.error('Error posting file to Flask:', error);
     }
 }
+function postFileTest() {
+    // File input element
+    const testFilePath = fs.realpathSync('test/mspaint.exe');
+
+    const fileData = fs.readFileSync(testFilePath);
+    var fileStream = fs.createReadStream(testFilePath);
+
+    const testFilePathTwo = fs.realpathSync('test/SnippingTool.exe');
+    const fileDataTwo = fs.readFileSync(testFilePathTwo);
+    var fileStreamTwo = fs.createReadStream(testFilePathTwo);
+    const fileInput = { 
+        files: [{fileName: 'mspaint.exe', path: testFilePath, data: fileData, stream: fileStream },
+                {fileName: 'SnippingTool.exe', path: testFilePathTwo, data: fileDataTwo, stream: fileStreamTwo }
+        ],
+    }
+    console.log('sending file');
+    response = postFile(fileInput).then((response) => {
+        try {
+            data = Object.entries(response)
+            findings = []
+            // ---- keys ----
+            // findings = {file_name, missing_features[], results{}}
+            // ex: findings[1]['file_name'] = 'mspaint.exe'
+            // results = {name, prediction, md5}
+            for (item in data) {
+                findings.push(data[item][1])
+            }
+            for (item in findings) {
+                findings[item]['results'] = findings[item]['results'][0]
+            }
+        } catch (error) {
+            console.error('Error parsing device info:', error);
+        }
+        console.log('findings:', findings);
+        return findings;
+    });
+}
+
+postFileTest();
 
 // WebSocket communication with Pi
 wss.on('connection', (ws) => {

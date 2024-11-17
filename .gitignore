@@ -1,7 +1,9 @@
 node_modules/
 backend/node_modules/
 model/venv/
+model/sklearn/
 .env
 *.log
 .vscode/launch.json
 .vscode/tasks.json
+model/Dockerfile copy
