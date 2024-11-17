@@ -9,4 +9,4 @@ spec:
   - name: backend
     image: /draellemeister/backend
     ports:
-    - containerPort: 80
+    - containerPort: 3000

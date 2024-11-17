@@ -10,7 +10,7 @@ import FormData from 'form-data';
 // Convert import.meta.url to __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+const featureExtractorAddress = 'feature-extraction-service:5000/' //'http://localhost:5000';
 const app = express();
 const port = 3000;
 
@@ -40,7 +40,7 @@ async function postFile(fileInput) {
     });
 
     try {
-        const response = await axios.post('http://flask-app:5000/extract_features', formData, {
+        const response = await axios.post(featureExtractorAddress+'extract_features', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 ...formData.getHeaders()
@@ -87,13 +87,6 @@ function postFileTest() {
         }
     });
 }
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-await sleep(10000);
-postFileTest();
 
 // WebSocket communication with Pi
 wss.on('connection', (ws) => {
