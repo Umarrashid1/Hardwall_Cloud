@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: feature-extraction-replicaset
+  labels:
+    app: feature-extraction
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: feature-extraction
+  template:
+    metadata:
+      labels:
+        app: feature-extraction
+    spec:
+      containers:
+      - name: feature-extraction
+        image: docker.io/draellemeister/feature-extract
+        ports:
+        - containerPort: 5000
