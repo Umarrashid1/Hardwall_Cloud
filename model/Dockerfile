@@ -1,7 +1,7 @@
 # Dockerfile
 
 ARG PYTHON_VERSION=3.11.9
-FROM python:${PYTHON_VERSION}-slim as base
+FROM python:${PYTHON_VERSION}-slim AS base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
