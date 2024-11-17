@@ -4,17 +4,17 @@ import pandas as pd
 import pickle
 import os
 
-def scan():
+def scan(extracted_features_data=None):
     # Load the model
-    with open('model/random_forest_model.pkl', 'rb') as file:
+    with open('random_forest_model.pkl', 'rb') as file:
         model = pickle.load(file)
 
     # Check if the selected features file exists
-    selected_features_path = 'model/Selected Features.pkl'
+    selected_features_path = 'Selected Features.pkl'
     print(f"Loading selected features from {selected_features_path}")
     if not os.path.exists(selected_features_path):
         print(f"Error: '{selected_features_path}' file not found. Please ensure the file exists in the correct directory.")
-        exit(1)
+        return
 
     # Load the selected features
     with open(selected_features_path, 'rb') as file:
@@ -22,20 +22,26 @@ def scan():
     # print(f"Loaded selected features: {selected_features.tolist()}")
 
     # Load the extracted features from the CSV file
-    features_file = 'extracted_features.csv'
-    if not os.path.exists(features_file):
-        print(f"Error: '{features_file}' file not found. Please ensure the file exists in the correct directory.")
-        exit(1)
-
-    new_data = pd.read_csv(features_file)
+    if extracted_features_data is None:
+        features_file = 'extracted_features.csv'
+        if not os.path.exists(features_file):
+            print(f"Error: '{features_file}' file not found. Please ensure the file exists in the correct directory.")
+            return
+        new_data = pd.read_csv(features_file)
+    else:
+        new_data = extracted_features_data
+    
 
     # Print available columns to help debug
     # print("Extracted columns:", new_data.columns.tolist())
 
     # Ensure the new data contains the expected features
     missing_features = set(selected_features) - set(new_data.columns)
+    missing_features_list = []
     if missing_features:
         print(f"Warning: The following expected features are missing in the new data: {missing_features}")
+        missing_features_list = list(missing_features)
+
 
     # Filter the new_data to only contain the columns expected by the model
     new_data_numeric = new_data.reindex(columns=selected_features).fillna(0)
@@ -65,7 +71,7 @@ def scan():
     else:
         print("No valid data available for prediction.")
     
-    return results
+    return results, missing_features_list
 
 if __name__ == "__main__":
     scan()
