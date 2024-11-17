@@ -4,23 +4,91 @@ import hashlib
 import os
 import sys  # Import sys to access command-line arguments
 import predict_new_samples
+from werkzeug.utils import secure_filename
+import tempfile
 from flask import Flask, request, jsonify
 #PORT = 5000
 PORT = int(os.environ.get('PORT', 5000))
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 
 @app.route('/extract_features', methods=['POST'])
-def extract_features_ms():
-    # Get the JSON data from the request
-    data = request.get_json()
-    file_paths = data['file_paths']
-    df =  process_files_in_directory(file_paths)
-    results = predict_new_samples.scan()
-    if results is not None:
-        return jsonify(results.to_dict(orient='records'))
+def extract_features():
+    final_findings = []
+    request_files = request.files.getlist('file')
+    
+    
+    for file in request_files:
+        print(file)
+        print(file.filename)
+        file.filename = secure_filename(file.filename)
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            file.save(temp_file.name)
+            features = extract_features(temp_file.name)
+            os.remove(temp_file.name)
+        if features is not None:
+            data = []
+            data.append(features)
+            df = pd.DataFrame(data)
+        
+        result, missing_features = predict_new_samples.scan(df)
+        
+        collected_results = {
+            'file_name': file.filename,
+            'results': result.to_dict(orient='records'),
+            'missing_features': missing_features
+        }
+        final_findings.append(collected_results)
+    if final_findings:
+            return jsonify(final_findings)
     else:
-        return jsonify([])
+        return jsonify({'message': 'Error extracting features from file'}), 400
+   
 
+
+
+@app.route('/extract_test', methods=['POST'])
+def extract_test():
+    print("Extracting features from file")
+    print('\n\n')
+    print(request.files)
+    if 'file' not in request.files:
+        return jsonify({'message': 'No file part in the request'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'message': 'No file selected for uploading'}), 400
+
+    if file:
+        file.filename = secure_filename(file.filename)
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            file.save(temp_file.name)
+            features = extract_features(temp_file.name)
+            os.remove(temp_file.name)
+        if features is not None:
+            data = []
+            data.append(features)
+            
+            #output_file = 'extracted_features.csv'
+            df = pd.DataFrame(data)
+            #df.to_csv(output_file, index=False)
+            
+            results, missing_features = predict_new_samples.scan(df)
+            if results is not None:
+                return jsonify(results.to_dict(orient='records'), missing_features)
+        else:
+            return jsonify({'message': 'Error extracting features from file'}), 400
+    return jsonify({'message': 'shit received'})
+        
+    
+        
+    
+
+@app.route('/test', methods=['POST'])
+def test():
+    return jsonify({'message': 'Test successful'})
+
+    
 
 def extract_features(file_path):
     try:
@@ -89,6 +157,7 @@ def process_files(file_paths):
     else:
         print(f"No features extracted from {len(file_paths)} files")
         return None
+
 
 def get_file_paths(directory_path):
     file_paths = []

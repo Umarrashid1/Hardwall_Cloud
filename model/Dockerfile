@@ -35,12 +35,13 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Copy the source code into the container
 COPY . .
+#COPY extracted_features.csv /app/extracted_features.csv
 
 # Switch to the non-privileged user to run the application.
 USER appuser
 
-# Copy the source code into the container.
-COPY . .
+# Create the directory where the file will be generated and set permissions
+#RUN mkdir -p /app && chown -R appuser:appuser /app
 
 # Expose the port that the application listens on.
 EXPOSE 5000
