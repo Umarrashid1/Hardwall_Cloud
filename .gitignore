@@ -1,4 +1,6 @@
 node_modules/
+backend/node_modules/
+model/venv/
 .env
 *.log
 .vscode/launch.json
