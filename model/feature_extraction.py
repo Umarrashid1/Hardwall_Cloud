@@ -4,6 +4,22 @@ import hashlib
 import os
 import sys  # Import sys to access command-line arguments
 import predict_new_samples
+from flask import Flask, request, jsonify
+#PORT = 5000
+PORT = int(os.environ.get('PORT', 5000))
+app = Flask(__name__)
+
+@app.route('/extract_features', methods=['POST'])
+def extract_features_ms():
+    # Get the JSON data from the request
+    data = request.get_json()
+    file_paths = data['file_paths']
+    df =  process_files_in_directory(file_paths)
+    results = predict_new_samples.scan()
+    if results is not None:
+        return jsonify(results.to_dict(orient='records'))
+    else:
+        return jsonify([])
 
 
 def extract_features(file_path):
@@ -59,6 +75,38 @@ def extract_features(file_path):
         print(f"Error processing {file_path}: {e}")
         return None
 
+def process_files(file_paths):
+    data = []
+    for file_path in file_paths:
+        features = extract_features(file_path)
+        if features is not None:
+            data.append(features)
+
+    if data:
+        df = pd.DataFrame(data)
+        print(f"Features extracted from {len(file_paths)} files")
+        return df
+    else:
+        print(f"No features extracted from {len(file_paths)} files")
+        return None
+
+def get_file_paths(directory_path):
+    file_paths = []
+    files_excluded = []
+    for file_name in os.listdir(directory_path):
+        # Process files with .exe and .bin extensions
+        if file_name.endswith(('.exe', '.bin')):
+            file_path = os.path.join(directory_path, file_name)
+            file_paths.append(file_path)
+        elif os.path.isdir(file_name):
+            # Recursive for subdirs
+            subdirectory_path = os.path.join(directory_path, file_name)
+            subdirectory_file_paths, subdirectory_files_excluded = get_file_paths(subdirectory_path)
+            file_paths.extend(subdirectory_file_paths)
+            files_excluded.extend(subdirectory_files_excluded)
+        else:
+            files_excluded.append(file_name)
+    return file_paths, files_excluded
 
 def process_files_in_directory(directory_path):
     data = []
@@ -82,8 +130,11 @@ def process_files_in_directory(directory_path):
 
 
 if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=PORT)
     # Get the directory path from command-line arguments
-    directory_path = sys.argv[1]
-    process_files_in_directory(directory_path)
-    predict_new_samples.scan()
+    #directory_path = sys.argv[1]
+    #process_files_in_directory(directory_path)
+    #results = predict_new_samples.scan()
+
+
 

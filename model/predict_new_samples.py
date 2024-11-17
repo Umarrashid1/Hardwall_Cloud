@@ -64,6 +64,8 @@ def scan():
         print(results)
     else:
         print("No valid data available for prediction.")
+    
+    return results
 
 if __name__ == "__main__":
     scan()
