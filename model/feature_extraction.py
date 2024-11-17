@@ -130,7 +130,8 @@ def process_files_in_directory(directory_path):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=PORT)
+    #app.run(host='0.0.0.0', port=PORT)
+    pass
     # Get the directory path from command-line arguments
     #directory_path = sys.argv[1]
     #process_files_in_directory(directory_path)
