@@ -5,6 +5,8 @@ const socket = new WebSocket('ws://130.225.37.50:3000');
 
 socket.addEventListener('open', () => {
     console.log('Connected to WebSocket server');
+    // Optionally send a message to request initial Pi status on connection
+    socket.send(JSON.stringify({ action: 'checkPiStatus' }));
 });
 
 socket.addEventListener('message', (event) => {
@@ -37,13 +39,8 @@ function updateUIBasedOnPiStatus() {
     const blockButton = document.getElementById("blockButton");
     const allowButton = document.getElementById("allowButton");
 
-    if (piConnected) {
-        blockButton.disabled = false;
-        allowButton.disabled = false;
-    } else {
-        blockButton.disabled = true;
-        allowButton.disabled = true;
-    }
+    blockButton.disabled = !piConnected;
+    allowButton.disabled = !piConnected;
 }
 
 // Event listeners for block and allow buttons
