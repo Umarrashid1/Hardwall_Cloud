@@ -53,6 +53,27 @@ wss.on('connection', (ws, req) => {
                 console.error('Error parsing message from Pi:', error);
             }
         });
+        ws.on('message', (message) => {
+            try {
+                    const data = JSON.parse(message);
+                    console.log('Message received from Pi:', data);
+
+                    // Handle Pi status updates
+                    if (data.type === 'usbStatus') {
+                        console.log('USB status update from Pi:', data.status);
+
+                        // Forward the status to the frontend
+                        if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                            frontendClient.send(JSON.stringify({
+                                usbStatus: data.status
+                            }));
+                        }
+                    }
+            } catch (error) {
+                console.error('Error parsing message from Pi:', error);
+            }
+});
+
 
         ws.on('close', () => {
             console.log('Pi disconnected');
