@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple UI with Side Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>HARDWALL</h1>
+</header>
+
+<!-- Side Panel -->
+<div id="sidePanel">
+    <button class="sideButton" id="homeButton">Home</button>
+    <button class="sideButton" id="aboutButton">About</button>
+    <button class="sideButton" id="contactButton">Contact</button>
+</div>
+
+<!-- Main Content -->
+<main>
+    <!-- Top Panel Buttons -->
+    <div id="topPanel" style="display: none;">
+        <button class="topButton" id="blockButton">BLOCK</button>
+        <button class="topButton" id="allowButton">ALLOW</button>
+        <button class="topButton" id="configureButton">CONFIGURE</button>
+    </div>
+
+
+    <!-- Output Window -->
+    <div id="outputWindow">
+        <label id="deviceStatus">
+            Device Status: <span id="deviceStatusText"></span>
+        </label>
+
+        <label id="outputWindowLabel">
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        </label>
+    </div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
