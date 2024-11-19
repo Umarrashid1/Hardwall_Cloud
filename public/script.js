@@ -1,7 +1,7 @@
 let piConnected = false;
 
 // Connect to the WebSocket server
-const socket = new WebSocket('ws://localhost:8080');
+const socket = new WebSocket('ws://130.225.37.50:3000');
 
 socket.addEventListener('open', () => {
     console.log('Connected to WebSocket server');
