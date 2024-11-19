@@ -1,116 +1,110 @@
 const express = require('express');
 const path = require('path');
+const { spawn } = require('child_process');
 const WebSocket = require('ws');
-const { spawn } = require('child_process'); // To run Python scripts
 const app = express();
 const port = 3000;
 
-let deviceInfo = null; // Store the device info temporarily
-let showButtons = false;  // Flag to track whether buttons should be shown
-
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Define routes (optional)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 // Start the Express server
 const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
 
-// Set up WebSocket server to communicate with the Pi
+// WebSocket server setup
 const wss = new WebSocket.Server({ noServer: true });
+let frontendClients = [];
+let piClient = null;
 
-// WebSocket communication with Pi
-wss.on('connection', (ws) => {
-    console.log('Pi connected via WebSocket');
+wss.on('connection', (ws, req) => {
+    ws.isPiConnection = req.url.includes('/pi');
 
-    // Listen for messages from Pi (e.g., USB device info)
-    ws.on('message', (message) => {
-        console.log('Received message from Pi:', message);
+    if (ws.isPiConnection) {
+        console.log('Pi connected via WebSocket');
+        piClient = ws;
 
-        const messageString = message.toString();  // Convert buffer to string
+        ws.on('message', (message) => {
+            console.log('Received message from Pi:', message);
+            let deviceData;
 
-        // Attempt to parse the incoming message as JSON
-        try {
-            const parsedDeviceInfo = JSON.parse(messageString);
-            console.log('Device info:', parsedDeviceInfo);
+            try {
+                deviceData = JSON.parse(message);
+                console.log('Parsed device info:', deviceData);
 
-            // Store device info in memory
-            deviceInfo = parsedDeviceInfo;
-            showButtons = true;
-            // Respond with 'allow' for now (can be changed as needed)
-            ws.send('allow');
+                // Broadcast data to all connected frontend clients
+                frontendClients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify({
+                            showButtons: true,
+                            deviceInfo: deviceData
+                        }));
+                    }
+                });
 
-            // After receiving the message, call the Python script to process files
-            const directoryPath = 'model/test'; // Adjust this to your actual directory path
+                // Execute a Python script
+                const directoryPath = 'model/test'; // Adjust as needed
+                const pythonProcess = spawn('python3', ['model/feature_extraction.py', directoryPath]);
 
-            // Run the Python script using spawn with python3
-            const pythonProcess = spawn('python3', ['model/feature_extraction.py', directoryPath]);
+                pythonProcess.stdout.on('data', (data) => {
+                    console.log(`Python script output: ${data}`);
+                });
 
-            // Handle output from the Python script
-            pythonProcess.stdout.on('data', (data) => {
-                console.log(`Python script output: ${data}`);
-            });
+                pythonProcess.stderr.on('data', (data) => {
+                    console.error(`Python script error: ${data}`);
+                });
 
-            // Handle any errors from the Python script
-            pythonProcess.stderr.on('data', (data) => {
-                console.error(`Python script error: ${data}`);
-            });
+                pythonProcess.on('close', (code) => {
+                    console.log(`Python script finished with exit code ${code}`);
+                });
 
-            // Handle the end of the Python script execution
-            pythonProcess.on('close', (code) => {
-                console.log(`Python script finished with exit code ${code}`);
-            });
+            } catch (error) {
+                console.error('Error parsing device info:', error);
+            }
+        });
 
-        } catch (error) {
-            console.error('Error parsing device info:', error);
-            ws.send('block');  // If there's an error, block the device
-        }
-    });
+        ws.on('close', () => {
+            console.log('Pi disconnected');
+            piClient = null;
+        });
 
-    ws.on('close', () => {
-        console.log('Pi disconnected');
-    });
+    } else {
+        console.log('Frontend client connected');
+        frontendClients.push(ws);
 
+        ws.on('message', (message) => {
+            if (!piClient) {
+                console.error('No Pi connected to handle the message.');
+                return;
+            }
+
+            console.log('Message received from frontend:', message);
+            try {
+                const command = JSON.parse(message);
+
+                if (command.action === 'block') {
+                    console.log('Sending block command to Pi');
+                    piClient.send('block');
+                } else if (command.action === 'allow') {
+                    console.log('Sending allow command to Pi');
+                    piClient.send('allow');
+                }
+            } catch (error) {
+                console.error('Error parsing frontend message:', error);
+            }
+        });
+
+        ws.on('close', () => {
+            frontendClients = frontendClients.filter(client => client !== ws);
+            console.log('Frontend client disconnected');
+        });
+    }
 });
 
-// Upgrade HTTP server to WebSocket server
+// Upgrade HTTP requests to WebSocket connections
 server.on('upgrade', (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit('connection', ws, request);
     });
-});
-
-// HTTP endpoint to show buttons and send device info
-app.get('/api/show-buttons', (req, res) => {
-    if (showButtons) {
-        res.json({
-            showButtons: true,
-            deviceInfo: deviceInfo,
-        });
-    } else {
-        res.json({ showButtons: false });
-    }
-});
-
-// Endpoint to handle "block" action
-app.post('/api/block', (req, res) => {
-    console.log('Device blocked');
-    deviceState = 'block';  // Block the device
-
-    // Respond to frontend
-    res.json({ message: 'Device blocked successfully' });
-});
-
-// Endpoint to handle "allow" action
-app.post('/api/allow', (req, res) => {
-    console.log('Device allowed');
-    deviceState = 'allow';  // Allow the device
-
-    // Respond to frontend
-    res.json({ message: 'Device allowed successfully' });
 });
