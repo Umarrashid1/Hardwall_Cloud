@@ -77,3 +77,4 @@ function hideTopPanel() {
     const topPanel = document.getElementById("topPanel");
     topPanel.style.display = "none"; // Hide the top panel
 }
+a
