@@ -1,7 +1,6 @@
-const WebSocket = require('ws'); // Import WebSocket
+const WebSocket = require('ws');
 const express = require('express');
 const path = require('path');
-const { spawn } = require('child_process');
 const app = express();
 const port = 3000;
 
@@ -19,7 +18,7 @@ let frontendClient = null;
 let piClient = null;
 
 wss.on('connection', (ws, req) => {
-	ws.isPiConnection = req.headers['x-device-type'] === 'Pi';  // Check if the device is a Raspberry Pi
+    ws.isPiConnection = req.headers['x-device-type'] === 'Pi'; // Identify if the connection is from a Pi
 
     if (ws.isPiConnection) {
         console.log('Pi connected via WebSocket');
@@ -31,22 +30,27 @@ wss.on('connection', (ws, req) => {
         }
 
         ws.on('message', (message) => {
-            console.log('Received message from Pi:', message);
-            let deviceData;
-
             try {
-                deviceData = JSON.parse(message);
-                console.log('Parsed device info:', deviceData);
+                const data = JSON.parse(message);
+                console.log('Received message from Pi:', data);
 
-                // Send data to the paired frontend client
-                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                    frontendClient.send(JSON.stringify({
-                        showButtons: true,
-                        deviceInfo: deviceData
-                    }));
+                // Handle Pi status updates
+                if (data.type === 'status') {
+                    console.log('Status update from Pi:', data.status);
+                }
+
+                // Forward `deviceInfo` to the frontend
+                if (data.type === 'deviceInfo') {
+                    console.log('Forwarding deviceInfo to frontend:', data);
+                    if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                        frontendClient.send(JSON.stringify({
+                            showButtons: true,
+                            deviceInfo: data
+                        }));
+                    }
                 }
             } catch (error) {
-                console.error('Error parsing device info:', error);
+                console.error('Error parsing message from Pi:', error);
             }
         });
 
@@ -54,7 +58,7 @@ wss.on('connection', (ws, req) => {
             console.log('Pi disconnected');
             piClient = null;
 
-            // Notify frontend client of Pi disconnection
+            // Notify the frontend client of Pi disconnection
             if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                 frontendClient.send(JSON.stringify({ piConnected: false }));
             }
@@ -64,25 +68,31 @@ wss.on('connection', (ws, req) => {
         console.log('Frontend client connected');
         frontendClient = ws;
 
-        // Notify the frontend of Pi connection status if already connected
+        // Notify the frontend of Pi connection status
         frontendClient.send(JSON.stringify({ piConnected: !!piClient }));
 
         ws.on('message', (message) => {
-            if (!piClient || piClient.readyState !== WebSocket.OPEN) {
-                console.error('No Pi connected to handle the message.');
-                return;
-            }
-
-            console.log('Message received from frontend:', message);
             try {
-                const command = JSON.parse(message);
+                const data = JSON.parse(message);
+                console.log('Message received from frontend:', data);
 
-                if (command.action === 'block') {
-                    console.log('Sending block command to Pi');
-                    piClient.send('block');
-                } else if (command.action === 'allow') {
-                    console.log('Sending allow command to Pi');
-                    piClient.send('allow');
+                // Handle `checkPiStatus` action
+                if (data.action === 'checkPiStatus') {
+                    ws.send(JSON.stringify({ piConnected: !!piClient }));
+                    console.log('Sent Pi connection status to frontend:', !!piClient);
+                }
+
+                // Forward commands to the Pi
+                if (piClient && piClient.readyState === WebSocket.OPEN) {
+                    if (data.action === 'block') {
+                        console.log('Sending block command to Pi');
+                        piClient.send(JSON.stringify({ action: 'block' }));
+                    } else if (data.action === 'allow') {
+                        console.log('Sending allow command to Pi');
+                        piClient.send(JSON.stringify({ action: 'allow' }));
+                    }
+                } else {
+                    console.error('No Pi connected to handle the command.');
                 }
             } catch (error) {
                 console.error('Error parsing frontend message:', error);
