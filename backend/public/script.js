@@ -1,4 +1,5 @@
 let piConnected = false;
+let usbStatus = "Unknown";
 let socket;
 
 // Initialize WebSocket connection and event listeners
@@ -29,8 +30,13 @@ function initializeWebSocket() {
         if (data.piConnected !== undefined) {
             piConnected = data.piConnected;
             updateUIBasedOnPiStatus();
-        } else {
-            console.warn('No `piConnected` field in message:', data);
+        }
+
+        // Handle USB status updates
+        if (data.usbStatus !== undefined) {
+            console.log('USB status update received:', data.usbStatus);
+            usbStatus = data.usbStatus;
+            updateUSBStatus();
         }
 
         // Show buttons and update device info if available
@@ -79,6 +85,16 @@ function updateUIBasedOnPiStatus() {
     }
 }
 
+// Update the USB status display
+function updateUSBStatus() {
+    const usbStatusElement = document.getElementById("usbStatus");
+    if (usbStatusElement) {
+        usbStatusElement.textContent = `USB Status: ${usbStatus}`;
+    } else {
+        console.error("`usbStatus` element not found in the DOM.");
+    }
+}
+
 // Event listeners for block and allow buttons
 document.getElementById("blockButton").addEventListener("click", () => {
     if (!piConnected) {
@@ -101,18 +117,31 @@ document.getElementById("allowButton").addEventListener("click", () => {
 // Utility functions for UI updates
 function updateDeviceStatus(statusText) {
     const statusElement = document.getElementById("deviceStatusText");
-    statusElement.textContent = statusText;
+    if (statusElement) {
+        statusElement.textContent = statusText;
+    } else {
+        console.error("`deviceStatusText` element not found in the DOM.");
+    }
 }
 
 function showTopPanel() {
     const topPanel = document.getElementById("topPanel");
-    topPanel.style.display = "flex"; // Make the top panel visible
+    if (topPanel) {
+        topPanel.style.display = "flex"; // Make the top panel visible
+    } else {
+        console.error("`topPanel` element not found in the DOM.");
+    }
 }
 
 function hideTopPanel() {
     const topPanel = document.getElementById("topPanel");
-    topPanel.style.display = "none"; // Hide the top panel
+    if (topPanel) {
+        topPanel.style.display = "none"; // Hide the top panel
+    } else {
+        console.error("`topPanel` element not found in the DOM.");
+    }
 }
 
 // Initialize the WebSocket connection
 initializeWebSocket();
+
