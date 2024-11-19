@@ -18,6 +18,16 @@ header, footer {
     height: 80px;
 }
 
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: flex;
+    gap: 10px;
+}
+
+
 main {
     padding: 1rem;
 }

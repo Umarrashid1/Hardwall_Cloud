@@ -19,7 +19,6 @@ def scan():
     # Load the selected features
     with open(selected_features_path, 'rb') as file:
         selected_features = pickle.load(file)
-    # print(f"Loaded selected features: {selected_features.tolist()}")
 
     # Load the extracted features from the CSV file
     features_file = 'extracted_features.csv'
@@ -29,9 +28,6 @@ def scan():
 
     new_data = pd.read_csv(features_file)
 
-    # Print available columns to help debug
-    # print("Extracted columns:", new_data.columns.tolist())
-
     # Ensure the new data contains the expected features
     missing_features = set(selected_features) - set(new_data.columns)
     if missing_features:
@@ -40,26 +36,23 @@ def scan():
     # Filter the new_data to only contain the columns expected by the model
     new_data_numeric = new_data.reindex(columns=selected_features).fillna(0)
 
-    # Print the feature columns to verify
-    # print("Filtered columns for prediction:", new_data_numeric.columns.tolist())
-
-
-    # Debugging: Print the input data used for prediction
-    # print("Input data used for prediction:")
-    # print(new_data_numeric)
-
-    # Make predictions if there are rows available
+    # Make predictions
     if not new_data_numeric.empty:
         predictions = model.predict(new_data_numeric)
+        probabilities = model.predict_proba(new_data_numeric)
 
         # Map predictions to labels
         prediction_labels = ['Malicious' if pred == 0 else 'Benign' for pred in predictions]
+
+        # Extract probabilities for the predicted class
+        prediction_certainty = [max(prob) for prob in probabilities]
 
         # Output results
         results = pd.DataFrame({
             'Name': new_data['Name'],
             'md5': new_data['md5'],
-            'Prediction': prediction_labels
+            'Prediction': prediction_labels,
+            'Probability': prediction_certainty
         })
         print(results)
     else:
