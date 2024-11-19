@@ -19,7 +19,7 @@ let frontendClient = null;
 let piClient = null;
 
 wss.on('connection', (ws, req) => {
-    ws.isPiConnection = req.url.includes('/pi');  // Adjust this condition as needed
+	ws.isPiConnection = req.headers['x-device-type'] === 'Pi';  // Check if the device is a Raspberry Pi
 
     if (ws.isPiConnection) {
         console.log('Pi connected via WebSocket');
