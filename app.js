@@ -15,7 +15,7 @@ const server = app.listen(port, () => {
 
 // WebSocket server setup
 const wss = new WebSocket.Server({ noServer: true });
-let frontendClients = [];
+let frontendClient = null;
 let piClient = null;
 
 wss.on('connection', (ws, req) => {
@@ -33,15 +33,13 @@ wss.on('connection', (ws, req) => {
                 deviceData = JSON.parse(message);
                 console.log('Parsed device info:', deviceData);
 
-                // Broadcast data to all connected frontend clients
-                frontendClients.forEach(client => {
-                    if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify({
-                            showButtons: true,
-                            deviceInfo: deviceData
-                        }));
-                    }
-                });
+                // Send data to the paired frontend client
+                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                    frontendClient.send(JSON.stringify({
+                        showButtons: true,
+                        deviceInfo: deviceData
+                    }));
+                }
 
                 // Execute a Python script
                 const directoryPath = 'model/test'; // Adjust as needed
@@ -67,14 +65,24 @@ wss.on('connection', (ws, req) => {
         ws.on('close', () => {
             console.log('Pi disconnected');
             piClient = null;
+
+            // Notify frontend client of Pi disconnection
+            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                frontendClient.send(JSON.stringify({ piConnected: false }));
+            }
         });
 
     } else {
         console.log('Frontend client connected');
-        frontendClients.push(ws);
+        frontendClient = ws;
+
+        // Notify frontend client if the Pi is already connected
+        if (piClient && piClient.readyState === WebSocket.OPEN) {
+            frontendClient.send(JSON.stringify({ piConnected: true }));
+        }
 
         ws.on('message', (message) => {
-            if (!piClient) {
+            if (!piClient || piClient.readyState !== WebSocket.OPEN) {
                 console.error('No Pi connected to handle the message.');
                 return;
             }
@@ -96,8 +104,8 @@ wss.on('connection', (ws, req) => {
         });
 
         ws.on('close', () => {
-            frontendClients = frontendClients.filter(client => client !== ws);
             console.log('Frontend client disconnected');
+            frontendClient = null;
         });
     }
 });

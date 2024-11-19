@@ -1,3 +1,5 @@
+let piConnected = false;
+
 // Connect to the WebSocket server
 const socket = new WebSocket('ws://localhost:8080');
 
@@ -9,6 +11,11 @@ socket.addEventListener('message', (event) => {
     const data = JSON.parse(event.data);
     console.log('Received data from backend:', data);
 
+    if (data.piConnected !== undefined) {
+        piConnected = data.piConnected;
+        updateUIBasedOnPiStatus();
+    }
+
     if (data.showButtons) {
         showTopPanel();
         updateDeviceStatus(`Device Info: ${JSON.stringify(data.deviceInfo)}`);
@@ -17,35 +24,43 @@ socket.addEventListener('message', (event) => {
 
 socket.addEventListener('close', () => {
     console.log('Disconnected from WebSocket server');
+    piConnected = false;
+    updateUIBasedOnPiStatus();
 });
 
 socket.addEventListener('error', (error) => {
     console.error('WebSocket error:', error);
 });
 
-// Event listeners for side panel buttons
-document.getElementById("homeButton").addEventListener("click", () => {
-    console.log("Home button clicked");
-    // Placeholder for any future backend call or logic
-});
+// Update the UI based on the Pi's connection status
+function updateUIBasedOnPiStatus() {
+    const blockButton = document.getElementById("blockButton");
+    const allowButton = document.getElementById("allowButton");
 
-document.getElementById("aboutButton").addEventListener("click", () => {
-    console.log("About button clicked");
-    // Placeholder for any future backend call or logic
-});
-
-document.getElementById("contactButton").addEventListener("click", () => {
-    console.log("Contact button clicked");
-    // Placeholder for any future backend call or logic
-});
+    if (piConnected) {
+        blockButton.disabled = false;
+        allowButton.disabled = false;
+    } else {
+        blockButton.disabled = true;
+        allowButton.disabled = true;
+    }
+}
 
 // Event listeners for block and allow buttons
 document.getElementById("blockButton").addEventListener("click", () => {
+    if (!piConnected) {
+        console.warn('Cannot send block command. Pi is not connected.');
+        return;
+    }
     console.log('Sending block command via WebSocket');
     socket.send(JSON.stringify({ action: 'block' }));
 });
 
 document.getElementById("allowButton").addEventListener("click", () => {
+    if (!piConnected) {
+        console.warn('Cannot send allow command. Pi is not connected.');
+        return;
+    }
     console.log('Sending allow command via WebSocket');
     socket.send(JSON.stringify({ action: 'allow' }));
 });
