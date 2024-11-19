@@ -1,7 +1,7 @@
+const WebSocket = require('ws'); // Import WebSocket
 const express = require('express');
 const path = require('path');
 const { spawn } = require('child_process');
-const WebSocket = require('ws');
 const app = express();
 const port = 3000;
 
@@ -19,11 +19,16 @@ let frontendClient = null;
 let piClient = null;
 
 wss.on('connection', (ws, req) => {
-    ws.isPiConnection = req.url.includes('/pi');
+    ws.isPiConnection = req.url.includes('/pi');  // Adjust this condition as needed
 
     if (ws.isPiConnection) {
         console.log('Pi connected via WebSocket');
         piClient = ws;
+
+        // Notify the frontend client that the Pi is connected
+        if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+            frontendClient.send(JSON.stringify({ piConnected: true }));
+        }
 
         ws.on('message', (message) => {
             console.log('Received message from Pi:', message);
@@ -40,23 +45,6 @@ wss.on('connection', (ws, req) => {
                         deviceInfo: deviceData
                     }));
                 }
-
-                // Execute a Python script
-                const directoryPath = 'model/test'; // Adjust as needed
-                const pythonProcess = spawn('python3', ['model/feature_extraction.py', directoryPath]);
-
-                pythonProcess.stdout.on('data', (data) => {
-                    console.log(`Python script output: ${data}`);
-                });
-
-                pythonProcess.stderr.on('data', (data) => {
-                    console.error(`Python script error: ${data}`);
-                });
-
-                pythonProcess.on('close', (code) => {
-                    console.log(`Python script finished with exit code ${code}`);
-                });
-
             } catch (error) {
                 console.error('Error parsing device info:', error);
             }
@@ -76,10 +64,8 @@ wss.on('connection', (ws, req) => {
         console.log('Frontend client connected');
         frontendClient = ws;
 
-        // Notify frontend client if the Pi is already connected
-        if (piClient && piClient.readyState === WebSocket.OPEN) {
-            frontendClient.send(JSON.stringify({ piConnected: true }));
-        }
+        // Notify the frontend of Pi connection status if already connected
+        frontendClient.send(JSON.stringify({ piConnected: !!piClient }));
 
         ws.on('message', (message) => {
             if (!piClient || piClient.readyState !== WebSocket.OPEN) {
@@ -116,3 +102,4 @@ server.on('upgrade', (request, socket, head) => {
         wss.emit('connection', ws, request);
     });
 });
+
