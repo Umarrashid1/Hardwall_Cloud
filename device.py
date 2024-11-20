@@ -132,7 +132,6 @@ async def monitor_usb_devices(websocket):
         device_info = get_device_info(device)
         if not device_info:
             continue
-
         # Send device info to backend
         try:
             await websocket.send(json.dumps(device_info))
