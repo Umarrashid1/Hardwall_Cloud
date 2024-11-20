@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: malware-predictor
+  labels:
+    app: malware-predictor
+spec:
+  containers:
+  - name: malware-predictor
+    image: docker.io/draellemeister/mal-predict
+    ports:
+    - containerPort: 5000
