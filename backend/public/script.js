@@ -42,7 +42,7 @@ function initializeWebSocket() {
         // Show buttons and update device info if available
         if (data.showButtons) {
             console.log('`showButtons` is true. Updating UI with device info:', data.deviceInfo);
-            showTopPanel();
+            showButtonPanel();
             updateDeviceStatus(`Device Info: ${JSON.stringify(data.deviceInfo)}`);
         } else {
             console.warn('`showButtons` is missing or false:', data);
@@ -53,7 +53,7 @@ function initializeWebSocket() {
     socket.addEventListener('close', () => {
         console.log('Disconnected from WebSocket server');
         piConnected = false;
-        hideTopPanel();
+        hideButtonPanel();
         updateUIBasedOnPiStatus();
 
         // Attempt to reconnect
@@ -124,21 +124,21 @@ function updateDeviceStatus(statusText) {
     }
 }
 
-function showTopPanel() {
-    const topPanel = document.getElementById("topPanel");
-    if (topPanel) {
-        topPanel.style.display = "flex"; // Make the top panel visible
+function showButtonPanel() {
+    const buttonPanel = document.getElementById("buttonPanel");
+    if (buttonPanel) {
+        buttonPanel.style.display = "flex"; // Make the top panel visible
     } else {
-        console.error("`topPanel` element not found in the DOM.");
+        console.error("`buttonPanel` element not found in the DOM.");
     }
 }
 
-function hideTopPanel() {
-    const topPanel = document.getElementById("topPanel");
-    if (topPanel) {
-        topPanel.style.display = "none"; // Hide the top panel
+function hideButtonPanel() {
+    const buttonPanel = document.getElementById("buttonPanel");
+    if (buttonPanel) {
+        buttonPanel.style.display = "none"; // Hide the top panel
     } else {
-        console.error("`topPanel` element not found in the DOM.");
+        console.error("`buttonPanel` element not found in the DOM.");
     }
 }
 
