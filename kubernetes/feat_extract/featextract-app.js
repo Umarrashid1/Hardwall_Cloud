@@ -10,7 +10,7 @@ const upload = multer({ dest: 'uploads/' });
 app.post('/upload', upload.single('file'), (req, res) => {
   const filePath = req.file.path;
   const featureExtractionScript = 'feature_extraction.py';
-  const predictionScript = 'predict_new_samples.py';
+  const predictionScript = 'run_scanner.py';
 
   // Run feature_extraction.py
   exec(`python ${featureExtractionScript} ${filePath}`, (err, stdout, stderr) => {
@@ -21,7 +21,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
     const featuresFilePath = stdout.trim(); // Assuming the script outputs the path to the features file
 
-    // Run predict_new_samples.py
+    // Run run_scanner.py
     exec(`python ${predictionScript} ${featuresFilePath}`, (err, stdout, stderr) => {
       if (err) {
         console.error(`Error running ${predictionScript}:`, stderr);
