@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend-container
-          image: docker.io/draellemeister/backend
+          image: docker.io/draellemeister/backend:latest
           ports:
             - containerPort: 5000
 ---

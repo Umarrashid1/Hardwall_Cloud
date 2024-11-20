@@ -48,5 +48,5 @@ for folder in "${!folders[@]}"; do
 done
 
 echo "All Docker images built successfully."
-ech "---SUCCESS---"
+echo "---SUCCESS---"
 sleep 2
