@@ -73,10 +73,13 @@ function initializeWebSocket() {
 function updateUIBasedOnPiStatus() {
     const blockButton = document.getElementById("blockButton");
     const allowButton = document.getElementById("allowButton");
+    const configButton = document.getElementById("configButton");
+    const restartButton = document.getElementById("restartButton");
 
     if (piConnected) {
         blockButton.disabled = false;
         allowButton.disabled = false;
+        restartButton.disabled = false;
         updateDeviceStatus("Pi connected.");
     } else {
         blockButton.disabled = true;
@@ -112,6 +115,10 @@ document.getElementById("allowButton").addEventListener("click", () => {
     }
     console.log('Sending allow command via WebSocket');
     socket.send(JSON.stringify({ action: 'allow' }));
+});
+
+document.getElementById("configButton").addEventListener("click", () => {
+    window.location.href = "./config_page/configpage.html";
 });
 
 // Utility functions for UI updates
