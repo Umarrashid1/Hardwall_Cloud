@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: feature-extraction-replicaset
+  name: malware-predictor-replicaset
   labels:
-    app: feature-extraction
+    app: malware-predictor
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: feature-extraction
+      app: malware-predictor
   template:
     metadata:
       labels:
-        app: feature-extraction
+        app: malware-predictor
     spec:
       containers:
       - name: feature-extraction
-        image: docker.io/draellemeister/feature-extract
+        image: docker.io/draellemeister/mal-predict
         ports:
         - containerPort: 5000
