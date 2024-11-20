@@ -1,0 +1,3 @@
+[submodule "nix_rebuilder/Hardwall_Nix"]
+	path = nix_rebuilder/Hardwall_Nix
+	url = https://github.com/Umarrashid1/Hardwall_Nix.git
