@@ -15,7 +15,7 @@ spec:
         app: malware-predictor
     spec:
       containers:
-      - name: feature-extraction
+      - name: malware-predictor
         image: docker.io/draellemeister/mal-predict
         ports:
         - containerPort: 5000
