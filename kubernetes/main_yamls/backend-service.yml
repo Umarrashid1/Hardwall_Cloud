@@ -5,7 +5,7 @@ metadata:
   labels:
     app: backend
 spec:
-  externalIPs: ["130.225.37.50", "localhost"]
+  externalIPs: ["130.225.37.50", "0.0.0.0"]
   selector:
     app: backend
   ports:
