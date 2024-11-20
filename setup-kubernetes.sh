@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Start Minikube
+echo "Starting Minikube..."
+minikube start
+
+# Apply all YAML files in the ./kubernetes/ directory
+echo "Applying Kubernetes configurations..."
+kubectl apply -f ./kubernetes/
+
+echo "Minikube started and Kubernetes configurations applied successfully."
