@@ -5,7 +5,7 @@ set -e
 
 # Start Minikube
 echo "Starting Minikube..."
-minikube start
+# minikube start
 
 # Apply all YAML files in the ./kubernetes/ directory
 echo "Applying Kubernetes configurations..."

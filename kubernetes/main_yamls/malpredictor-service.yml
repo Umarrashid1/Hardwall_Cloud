@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: malware-predictor-container
-          image: docker.io/draellemeister/mal-predict
+          image: docker.io/draellemeister/mal-predict:latest
           ports:
             - containerPort: 5000
 ---
