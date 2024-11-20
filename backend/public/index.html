@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="topPanel">
-        <button id="configButton" >Configure Hardwall</button>
-        <button id="restartButton" disabled>Restart Device</button>
+<div id="sidePanel">
+    <button id="configButton" >Configure Hardwall</button>
+    <button id="restartButton" disabled>Restart Device</button>
     <div id="container">
         <header>
             <h1>USB Status Monitor</h1>
@@ -23,7 +23,12 @@
                 </div>
             </div>
 
-            <div id="topPanel">
+            <div id="scannerPanel">
+                <p id="scannerStatus" disabled>Scanning </p>
+                <p id="scannerOutput">Scanner output:</p>
+            </div>
+
+            <div id="buttonPanel">
                 <button id="blockButton" disabled>Block USB</button>
                 <button id="allowButton" disabled>Allow USB</button>
             </div>
