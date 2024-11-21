@@ -44,38 +44,38 @@ wss.on('connection', (ws, req) => {
 
                 // Handle device info and trigger feature extraction and scanning
                 if (data.type === 'deviceInfo') {
-                    console.log('Starting feature extraction and scanning...');
-                    runFeatureExtractionAndScanning()
-                        .then(() => {
-                            // Send JSON results directly to the frontend
-                            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                                fs.readFile(SCANNING_RESULTS, 'utf8', (err, jsonData) => {
-                                    if (err) {
-                                        console.error('Error reading scanning results:', err);
-                                        frontendClient.send(JSON.stringify({
-                                            action: 'displayResults',
-                                            error: 'Failed to read scanning results.',
-                                        }));
-                                    } else {
-                                        frontendClient.send(JSON.stringify({
-                                            action: 'displayResults',
-                                            results: JSON.parse(jsonData),
-                                        }));
-                                    }
-                                });
-                            }
-                        })
-                        .catch((err) => {
-                            console.error('Error during feature extraction or scanning:', err);
+                    console.log('Received USB device info:', data.lsusb_output);
+                }
 
-                            // Notify frontend of error
-                            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                                frontendClient.send(JSON.stringify({
-                                    action: 'displayResults',
-                                    error: 'Feature extraction or scanning failed.',
-                                }));
-                            }
+                // Handle file list for validation and scanning
+                if (data.type === 'fileList') {
+                    console.log('Received file list from Pi:', data.files);
+
+                    let allFilesValid = true;
+                    data.files.forEach(file => {
+                        const filePath = path.join(UPLOAD_DIR, path.basename(file.path));
+                        if (!fs.existsSync(filePath)) {
+                            console.error(`File not found: ${filePath}`);
+                            allFilesValid = false;
+                        }
+                    });
+
+                    // Notify Pi of validation results
+                    const response = {
+                        action: 'fileReceived',
+                        status: allFilesValid ? 'success' : 'failed'
+                    };
+                    ws.send(JSON.stringify(response));
+
+                    // Trigger scanning if files are valid
+                    if (allFilesValid) {
+                        console.log("All files validated. Running feature extraction and scanning...");
+                        runFeatureExtractionAndScanning().then(() => {
+                            console.log("Scanning completed successfully.");
+                        }).catch((err) => {
+                            console.error("Error during scanning:", err);
                         });
+                    }
                 }
             } catch (error) {
                 console.error('Error parsing message from Pi:', error);
