@@ -27,7 +27,6 @@ async function postFile(fileInput) {
 }
 
 
-
 function postTestFiles() {
     console.log('Posting test files to:', featureExtractorAddress);
     const testFilePath = fs.realpathSync('test/mspaint.exe');
@@ -41,11 +40,14 @@ function postTestFiles() {
     const fileInput = { 
         files: [
             {fileName: 'mspaint.exe', path: testFilePath, data: fileData, stream: fileStream },
-            {fileName: 'SnippingTool.exe', path: testFilePathTwo, data: fileDataTwo, stream: fileStreamTwo }
         ],
     };
 
     postFile(fileInput).then((response) => {
+        if (!response) {
+            console.error('No response from postFile');
+            return;
+        }
         try {
             const data = Object.entries(response);
             const findings = [];
@@ -64,4 +66,4 @@ function postTestFiles() {
 }
 
 // Export the functions
-export { postFile, postTestFiles, commTest, featureExtractorAddress };
+export { postFile, postTestFiles, featureExtractorAddress };
