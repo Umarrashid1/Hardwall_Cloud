@@ -1,8 +1,16 @@
 const WebSocket = require('ws');
 const express = require('express');
 const path = require('path');
+const { exec } = require('child_process');
+const fs = require('fs');
 const app = express();
 const port = 3000;
+
+// Constants for file paths and scripts
+const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
+const FEATURE_EXTRACTION_SCRIPT = "feature_extraction.py";
+const SCANNING_SCRIPT = "run_scanner.py";
+const SCANNING_RESULTS = "scanning_results.json";
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -34,46 +42,45 @@ wss.on('connection', (ws, req) => {
                 const data = JSON.parse(message);
                 console.log('Received message from Pi:', data);
 
-                // Handle Pi status updates
-                if (data.type === 'status') {
-                    console.log('Status update from Pi:', data.status);
-                }
-
-                // Forward `deviceInfo` to the frontend
+                // Handle device info and trigger feature extraction and scanning
                 if (data.type === 'deviceInfo') {
-                    console.log('Forwarding deviceInfo to frontend:', data);
-                    if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                        frontendClient.send(JSON.stringify({
-                            showButtons: true,
-                            deviceInfo: data
-                        }));
-                    }
+                    console.log('Starting feature extraction and scanning...');
+                    runFeatureExtractionAndScanning()
+                        .then(() => {
+                            // Send JSON results directly to the frontend
+                            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                                fs.readFile(SCANNING_RESULTS, 'utf8', (err, jsonData) => {
+                                    if (err) {
+                                        console.error('Error reading scanning results:', err);
+                                        frontendClient.send(JSON.stringify({
+                                            action: 'displayResults',
+                                            error: 'Failed to read scanning results.',
+                                        }));
+                                    } else {
+                                        frontendClient.send(JSON.stringify({
+                                            action: 'displayResults',
+                                            results: JSON.parse(jsonData),
+                                        }));
+                                    }
+                                });
+                            }
+                        })
+                        .catch((err) => {
+                            console.error('Error during feature extraction or scanning:', err);
+
+                            // Notify frontend of error
+                            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                                frontendClient.send(JSON.stringify({
+                                    action: 'displayResults',
+                                    error: 'Feature extraction or scanning failed.',
+                                }));
+                            }
+                        });
                 }
             } catch (error) {
                 console.error('Error parsing message from Pi:', error);
             }
         });
-        ws.on('message', (message) => {
-            try {
-                    const data = JSON.parse(message);
-                    console.log('Message received from Pi:', data);
-
-                    // Handle Pi status updates
-                    if (data.type === 'usbStatus') {
-                        console.log('USB status update from Pi:', data.status);
-
-                        // Forward the status to the frontend
-                        if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                            frontendClient.send(JSON.stringify({
-                                usbStatus: data.status
-                            }));
-                        }
-                    }
-            } catch (error) {
-                console.error('Error parsing message from Pi:', error);
-            }
-});
-
 
         ws.on('close', () => {
             console.log('Pi disconnected');
@@ -134,3 +141,28 @@ server.on('upgrade', (request, socket, head) => {
     });
 });
 
+// Function to run feature extraction and scanning
+function runFeatureExtractionAndScanning() {
+    return new Promise((resolve, reject) => {
+        // Step 1: Run feature extraction
+        exec(`python3 ${FEATURE_EXTRACTION_SCRIPT} ${UPLOAD_DIR}`, (error, stdout, stderr) => {
+            if (error) {
+                console.error("Error during feature extraction:", stderr);
+                reject(stderr);
+                return;
+            }
+            console.log("Feature extraction output:", stdout);
+
+            // Step 2: Run malware scanning
+            exec(`python3 ${SCANNING_SCRIPT} ${path.join(UPLOAD_DIR, "extracted_features.csv")}`, (scanError, scanStdout, scanStderr) => {
+                if (scanError) {
+                    console.error("Error during malware scanning:", scanStderr);
+                    reject(scanStderr);
+                    return;
+                }
+                console.log("Scanning output:", scanStdout);
+                resolve(); // No need to return anything; results are saved to JSON
+            });
+        });
+    });
+}

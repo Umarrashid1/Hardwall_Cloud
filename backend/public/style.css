@@ -61,14 +61,14 @@ main {
 }
 
 /* Top Panel Buttons */
-#topPanel {
+#sidePanel {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-top: 15px;
 }
 
-#topPanel button {
+#sidePanel button {
     padding: 10px 20px;
     font-size: 1rem;
     font-weight: bold;
@@ -80,12 +80,12 @@ main {
     transition: background-color 0.3s ease;
 }
 
-#topPanel button:disabled {
+#buttonPanel button:disabled {
     background-color: #888;
     cursor: not-allowed;
 }
 
-#topPanel button:hover:not(:disabled) {
+#buttonPanel button:hover:not(:disabled) {
     background-color: #4a9fd8;
 }
 
