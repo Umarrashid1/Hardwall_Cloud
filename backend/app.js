@@ -160,9 +160,27 @@ function runFeatureExtractionAndScanning() {
                     reject(scanStderr);
                     return;
                 }
+
                 console.log("Scanning output:", scanStdout);
-                resolve(); // No need to return anything; results are saved to JSON
+
+                // Send scanning results to frontend
+                const resultsFilePath = path.join(UPLOAD_DIR, "scanning_results.json");
+                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                    try {
+                        const results = fs.readFileSync(resultsFilePath, "utf-8");
+                        frontendClient.send(JSON.stringify({ type: "scanningResults", results: JSON.parse(results) }));
+                        console.log("Scanning results sent to frontend.");
+                    } catch (err) {
+                        console.error("Error reading or sending scanning results:", err);
+                    }
+                } else {
+                    console.warn("No frontend connected. Scanning results not sent.");
+                }
+
+                resolve(); // Resolve after sending results
             });
         });
     });
 }
+
+
