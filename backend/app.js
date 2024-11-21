@@ -8,9 +8,9 @@ const port = 3000;
 
 // Constants for file paths and scripts
 const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
-const FEATURE_EXTRACTION_SCRIPT = "feature_extraction.py";
-const SCANNING_SCRIPT = "run_scanner.py";
-const SCANNING_RESULTS = "scanning_results.json";
+const FEATURE_EXTRACTION_SCRIPT = "../malware_predict/feature_extraction.py";
+const SCANNING_SCRIPT = "../malware_predict/run_scanner.py";
+const SCANNING_RESULTS = "../malware_predict/scanning_results.json";
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -160,8 +160,24 @@ function runFeatureExtractionAndScanning() {
                     reject(scanStderr);
                     return;
                 }
+
                 console.log("Scanning output:", scanStdout);
-                resolve(); // No need to return anything; results are saved to JSON
+
+                // Send scanning results to frontend
+                const resultsFilePath = path.join(UPLOAD_DIR, "scanning_results.json");
+                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                    try {
+                        const results = fs.readFileSync(resultsFilePath, "utf-8");
+                        frontendClient.send(JSON.stringify({ type: "scanningResults", results: JSON.parse(results) }));
+                        console.log("Scanning results sent to frontend.");
+                    } catch (err) {
+                        console.error("Error reading or sending scanning results:", err);
+                    }
+                } else {
+                    console.warn("No frontend connected. Scanning results not sent.");
+                }
+
+                resolve(); // Resolve after sending results
             });
         });
     });

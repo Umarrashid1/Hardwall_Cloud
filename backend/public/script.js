@@ -39,6 +39,10 @@ function initializeWebSocket() {
             updateUSBStatus();
         }
 
+        if (data.type === "scanningResults") {
+            console.log("Received scanning results:", data.results);
+        }
+
         // Show buttons and update device info if available
         if (data.showButtons) {
             console.log('`showButtons` is true. Updating UI with device info:', data.deviceInfo);
