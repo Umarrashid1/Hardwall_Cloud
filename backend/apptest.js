@@ -6,7 +6,7 @@ import { spawn } from 'child_process'; // To run Python scripts
 import axios from 'axios';
 import fs from 'fs';
 import FormData from 'form-data';
-import { postFile, postTestFiles } from './clusterServiceScripts.js'; // Import the functions
+import { postFile, postTestFiles, commTest } from './clusterServiceScripts.js'; // Import the functions
 
 // Convert import.meta.url to __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -53,7 +53,16 @@ app.get('/api/show-buttons', (req, res) => {
 
 function runTest() {
     console.log("Running test...");
-    postTestFiles();
+    commTest().then((response) => {
+        console.log("Response:", response);
+        try {
+            postTestFiles().then((findings) => {
+                console.log("Findings:", findings);
+            });
+        } catch (error) {
+            console.error('Error parsing device info:', error);
+        }
+    });
 }
 
 // Check for command-line arguments
