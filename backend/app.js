@@ -8,9 +8,9 @@ const port = 3000;
 
 // Constants for file paths and scripts
 const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
-const FEATURE_EXTRACTION_SCRIPT = "feature_extraction.py";
-const SCANNING_SCRIPT = "run_scanner.py";
-const SCANNING_RESULTS = "scanning_results.json";
+const FEATURE_EXTRACTION_SCRIPT = "../malware_predict/feature_extraction.py";
+const SCANNING_SCRIPT = "../malware_predict/run_scanner.py";
+const SCANNING_RESULTS = "../malware_predict/scanning_results.json";
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
