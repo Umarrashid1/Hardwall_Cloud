@@ -12,7 +12,7 @@ async function postFile(fileInput) {
     });
 
     try {
-        const response = await axios.post(featureExtractorAddress + '/malpredict', formData, {
+        const response = await axios.post(featureExtractorAddress, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 ...formData.getHeaders()
