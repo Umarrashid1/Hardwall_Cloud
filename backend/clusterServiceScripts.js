@@ -4,9 +4,9 @@ const FormData = require('form-data');
 
 
 // TODO: Update this address to match kube service address
-const featureExtractorAddress = 'http://example.com/malpredict';
+export const featureExtractorAddress = 'http://example.com/malpredict';
 
-async function postFile(fileInput) {
+export async function postFile(fileInput) {
     var formData = new FormData();
     fileInput.files.forEach(file => {
         formData.append('file', file.stream, file.data, file.fileName);
@@ -28,7 +28,7 @@ async function postFile(fileInput) {
 }
 
 
-function postTestFiles() {
+export function postTestFiles() {
     console.log('Posting test files to:', featureExtractorAddress);
     const testFilePath = fs.realpathSync('test/mspaint.exe');
     const fileData = fs.readFileSync(testFilePath);
@@ -72,6 +72,3 @@ function postTestFiles() {
         return 'No findings...';
     }
 }
-
-// Export the functions
-export { postFile, postTestFiles, featureExtractorAddress };
