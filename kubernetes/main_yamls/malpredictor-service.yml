@@ -35,5 +35,5 @@ spec:
       port: 5000
       targetPort: 5000
       #nodePort: 30080  # You can specify a port in the range 30000-32767 or let Kubernetes assign one automatically
-  type: NodePort
+  type: LoadBalancer
   
