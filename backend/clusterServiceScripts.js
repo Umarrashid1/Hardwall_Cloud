@@ -3,7 +3,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 
 // TODO: Update this address to match kube service address
-const featureExtractorAddress = 'feature-extraction-service:5000/';
+const featureExtractorAddress = 'http://example.com';
 
 async function postFile(fileInput) {
     var formData = new FormData();
@@ -12,7 +12,7 @@ async function postFile(fileInput) {
     });
 
     try {
-        const response = await axios.post(featureExtractorAddress + 'extract_features', formData, {
+        const response = await axios.post(featureExtractorAddress + '/malpredict', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 ...formData.getHeaders()
