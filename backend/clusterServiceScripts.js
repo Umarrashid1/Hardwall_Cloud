@@ -12,7 +12,7 @@ async function postFile(fileInput) {
     });
 
     try {
-        const response = await axios.post(featureExtractorAddress + '/malpredict', formData, {
+        const response = await axios.post(featureExtractorAddress, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 ...formData.getHeaders()
@@ -25,7 +25,6 @@ async function postFile(fileInput) {
         console.error('Error posting file to Flask:', error);
     }
 }
-
 
 
 function postTestFiles() {
@@ -41,11 +40,14 @@ function postTestFiles() {
     const fileInput = { 
         files: [
             {fileName: 'mspaint.exe', path: testFilePath, data: fileData, stream: fileStream },
-            {fileName: 'SnippingTool.exe', path: testFilePathTwo, data: fileDataTwo, stream: fileStreamTwo }
         ],
     };
 
     postFile(fileInput).then((response) => {
+        if (!response) {
+            console.error('No response from postFile');
+            return;
+        }
         try {
             const data = Object.entries(response);
             const findings = [];
@@ -64,4 +66,4 @@ function postTestFiles() {
 }
 
 // Export the functions
-export { postFile, postTestFiles, commTest, featureExtractorAddress };
+export { postFile, postTestFiles, featureExtractorAddress };
