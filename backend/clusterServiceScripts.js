@@ -74,4 +74,4 @@ function postTestFiles() {
 }
 
 // Export the functions
-export { postFile, postTestFiles, featureExtractorAddress };
+export { postFile, postTestFiles, commTest, featureExtractorAddress };
