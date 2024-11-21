@@ -1,3 +1,19 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: malware-predictor-service
+  labels:
+    app: malware-predictor
+spec:
+  selector:
+    app: malware-predictor
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,21 +35,3 @@ spec:
           image: docker.io/draellemeister/mal-predict:latest
           ports:
             - containerPort: 5000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: malware-predictor-service
-  labels:
-    app: malware-predictor
-spec:
-spec:
-  selector:
-    app: malware-predictor
-  ports:
-    - protocol: TCP
-      port: 5000
-      targetPort: 5000
-      #nodePort: 30080  # You can specify a port in the range 30000-32767 or let Kubernetes assign one automatically
-  type: LoadBalancer
-  
