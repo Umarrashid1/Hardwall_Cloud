@@ -3,7 +3,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 
 // TODO: Update this address to match kube service address
-const featureExtractorAddress = 'http://example.com';
+const featureExtractorAddress = 'http://example.com/malpredict';
 
 async function postFile(fileInput) {
     var formData = new FormData();
@@ -26,15 +26,7 @@ async function postFile(fileInput) {
     }
 }
 
-async function commTest() {
-    try {
-        const response = await axios.get(featureExtractorAddress + '/test');
-        console.log('Response:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error('Error posting file to Flask:', error);
-    }
-}
+
 
 function postTestFiles() {
     console.log('Posting test files to:', featureExtractorAddress);
@@ -52,8 +44,6 @@ function postTestFiles() {
             {fileName: 'SnippingTool.exe', path: testFilePathTwo, data: fileDataTwo, stream: fileStreamTwo }
         ],
     };
-    var firstRsponse = commTest();
-    console.log('firstRsponse:', firstRsponse);
 
     postFile(fileInput).then((response) => {
         try {
