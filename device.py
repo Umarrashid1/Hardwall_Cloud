@@ -146,7 +146,11 @@ async def monitor_usb_devices(websocket):
             continue
 
         file_list = gather_files(mount_point)
-        transfer_files(file_list)
+        success = await transfer_files_with_confirmation(gather_files(mount_point), websocket)
+        if success:
+            print("Files transferred and validated. Proceeding with unmount.")
+        else:
+            print("File transfer failed.")
         unmount_device(mount_point)
 
 
