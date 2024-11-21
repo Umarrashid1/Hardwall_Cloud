@@ -2,9 +2,8 @@ import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
 
-
-//TODO: Update this address to match kube service address
-const featureExtractorAddress = 'feature-extraction-service:5000/' 
+// TODO: Update this address to match kube service address
+const featureExtractorAddress = 'feature-extraction-service:5000/';
 
 async function postFile(fileInput) {
     var formData = new FormData();
@@ -13,7 +12,7 @@ async function postFile(fileInput) {
     });
 
     try {
-        const response = await axios.post(featureExtractorAddress+'extract_features', formData, {
+        const response = await axios.post(featureExtractorAddress + 'extract_features', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 ...formData.getHeaders()
@@ -27,7 +26,8 @@ async function postFile(fileInput) {
     }
 }
 
-function postFileTest() {
+function postTestFiles() {
+    console.log('Posting test files to:', featureExtractorAddress);
     const testFilePath = fs.realpathSync('test/mspaint.exe');
     const fileData = fs.readFileSync(testFilePath);
     var fileStream = fs.createReadStream(testFilePath);
@@ -60,3 +60,6 @@ function postFileTest() {
         }
     });
 }
+
+// Export the functions
+export { postFile, postTestFiles, featureExtractorAddress };
