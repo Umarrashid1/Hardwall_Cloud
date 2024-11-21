@@ -83,9 +83,10 @@ def gather_files(mount_point):
     return files
 
 
-def transfer_files(file_list):
-    """Transfer files to the remote server via SCP."""
+async def transfer_files_with_confirmation(file_list, websocket):
+    """Transfer files to the backend via SCP and wait for validation."""
     try:
+        # Transfer files using SCP
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(SERVER_IP, port=SSH_PORT, username=SSH_USERNAME, key_filename=KEY_FILE_PATH)
@@ -95,8 +96,25 @@ def transfer_files(file_list):
                 scp.put(file, REMOTE_DIR)
                 print(f"Transferred {file} to {REMOTE_DIR}")
         ssh.close()
+
+        # Notify backend about transferred files
+        file_list_payload = [{"path": file} for file in file_list]
+        await websocket.send(json.dumps({"type": "fileList", "files": file_list_payload}))
+        print("Sent file list to backend for validation.")
+
+        # Wait for backend validation response
+        response = await asyncio.wait_for(websocket.recv(), timeout=30)
+        validation_result = json.loads(response)
+        if validation_result.get("action") == "fileReceived" and validation_result.get("status") == "success":
+            print("File validation successful.")
+            return True
+        else:
+            print("File validation failed.")
+            return False
+
     except Exception as e:
-        print(f"Error transferring files: {e}")
+        print(f"Error during file transfer or validation: {e}")
+        return False
 
 
 def unmount_device(mount_point):
@@ -146,7 +164,7 @@ async def monitor_usb_devices(websocket):
             continue
 
         file_list = gather_files(mount_point)
-        success = await transfer_files_with_confirmation(gather_files(mount_point), websocket)
+        success = await transfer_files_with_confirmation(file_list, websocket)
         if success:
             print("Files transferred and validated. Proceeding with unmount.")
         else:
