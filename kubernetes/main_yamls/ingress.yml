@@ -4,6 +4,7 @@ kind: Ingress
 metadata:
   name: unified-ingress
   annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 64g
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
