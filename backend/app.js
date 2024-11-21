@@ -5,7 +5,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const app = express();
 const port = 3000;
-const { postTestFiles, postFile } = require('./testFiles');
+const { postTestFiles, postFile } = require('./clusterServiceScripts');
 
 // Constants for file paths and scripts
 const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
