@@ -1,6 +1,7 @@
-import axios from 'axios';
-import FormData from 'form-data';
-import fs from 'fs';
+const axios = require('axios');
+const fs = require('fs');
+const FormData = require('form-data');
+
 
 // TODO: Update this address to match kube service address
 const featureExtractorAddress = 'http://example.com/malpredict';
@@ -36,12 +37,14 @@ function postTestFiles() {
     const testFilePathTwo = fs.realpathSync('test/SnippingTool.exe');
     const fileDataTwo = fs.readFileSync(testFilePathTwo);
     var fileStreamTwo = fs.createReadStream(testFilePathTwo);
-
+    
+    var findings = [];
     const fileInput = { 
         files: [
             {fileName: 'mspaint.exe', path: testFilePath, data: fileData, stream: fileStream },
         ],
     };
+    
 
     postFile(fileInput).then((response) => {
         if (!response) {
@@ -63,6 +66,11 @@ function postTestFiles() {
             console.error('Error parsing device info:', error);
         }
     });
+   if (findings.length > 0) {
+        return findings;
+    } else {
+        return 'No findings...';
+    }
 }
 
 // Export the functions

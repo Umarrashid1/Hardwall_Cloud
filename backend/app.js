@@ -166,3 +166,20 @@ function runFeatureExtractionAndScanning() {
         });
     });
 }
+
+function runTest() {
+    console.log("Running test...");   
+    try {
+        postTestFiles().then((findings) => {
+            console.log("Findings:", findings);
+        });
+    } catch (error) {
+        console.error('Error parsing device info:', error);
+    }
+}
+
+// Check for command-line arguments
+const args = process.argv.slice(2);
+if (args.includes("test")) {
+    runTest();
+}
