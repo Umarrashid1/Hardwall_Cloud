@@ -26,6 +26,16 @@ async function postFile(fileInput) {
     }
 }
 
+async function commTest() {
+    try {
+        const response = await axios.get(featureExtractorAddress + '/test');
+        console.log('Response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error posting file to Flask:', error);
+    }
+}
+
 function postTestFiles() {
     console.log('Posting test files to:', featureExtractorAddress);
     const testFilePath = fs.realpathSync('test/mspaint.exe');
@@ -42,6 +52,8 @@ function postTestFiles() {
             {fileName: 'SnippingTool.exe', path: testFilePathTwo, data: fileDataTwo, stream: fileStreamTwo }
         ],
     };
+    var firstRsponse = commTest();
+    console.log('firstRsponse:', firstRsponse);
 
     postFile(fileInput).then((response) => {
         try {
