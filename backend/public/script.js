@@ -33,9 +33,9 @@ function initializeWebSocket() {
         }
 
         // Handle USB status updates
-        if (data.usbStatus !== undefined) {
-            console.log('USB status update received:', data.usbStatus);
-            usbStatus = data.usbStatus;
+        if (data.type !== undefined) {
+            console.log('USB status update received:', data.status);
+            usbStatus = data.status;
             updateUSBStatus();
         }
 
@@ -45,7 +45,6 @@ function initializeWebSocket() {
             showButtonPanel();
             updateDeviceStatus(`Device Info: ${JSON.stringify(data.lsusb_output)}`);
         }
-
 
         if (data.type === "scanningResults") {
             console.log("Received scanning results:", data.results);
