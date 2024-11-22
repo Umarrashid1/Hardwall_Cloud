@@ -225,6 +225,13 @@ async def reconnect():
                                 status_update = {"type": "usbStatus", "status": "allowed"}
                                 await websocket.send(json.dumps(status_update))
 
+                            elif command.get("action") == "rebuild":
+                                print("Received restart command from backend.")
+                                # do some subprocess stuff
+                                # subprocess.run(["sudo", "nixos-rebuild", "switch"], check=True)
+                                # Can be done from the cloud through a nixos container(maybe?):
+                                # nixos-rebuild --target-host user@example.com --use-remote-sudo switch
+
                         except websockets.exceptions.ConnectionClosed:
                             print("WebSocket connection closed during command handling.")
                             break
