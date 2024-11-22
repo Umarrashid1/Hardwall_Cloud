@@ -10,8 +10,8 @@ spec:
     app: backend
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 3000
+      port: 3030
+      targetPort: 3030
   type: ClusterIP
 ---
 apiVersion: apps/v1
@@ -34,4 +34,4 @@ spec:
         - name: backend-container
           image: docker.io/draellemeister/backend:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 3030

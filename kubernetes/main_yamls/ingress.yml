@@ -17,7 +17,7 @@ spec:
               service:
                 name: backend-service
                 port:
-                  number: 3000
+                  number: 3030
           - path: /malpredict
             pathType: Prefix
             backend:
