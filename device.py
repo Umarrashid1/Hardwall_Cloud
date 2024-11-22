@@ -19,25 +19,31 @@ REMOTE_DIR = "/home/ubuntu/box"
 
 
 def get_device_info(device):
-    """Get USB device information."""
-    device_id = f"{device.get('ID_VENDOR_ID')}:{device.get('ID_MODEL_ID')}"
-    print(f"Detected device with ID: {device_id}")
+    """Get detailed USB device information."""
     try:
+        device_id = f"{device.get('ID_VENDOR_ID')}:{device.get('ID_MODEL_ID')}"
+        print(f"Detected device with ID: {device_id}")
+
+        # Run lsusb for detailed information
         result = subprocess.run(['lsusb', '-v', '-d', device_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode == 0:
-            output = result.stdout.decode()
-            print(f"Device descriptor:\n{output}")
-
-            # Check if the device is a Mass Storage device
-            is_storage = "Mass Storage" in output
             return {
                 "type": "deviceInfo",
-                "lsusb_output": output,
-                "is_storage": is_storage
+                "lsusb_output": result.stdout.decode(),
+                "is_storage": "Mass Storage" in result.stdout.decode()
             }
+        else:
+            print(f"lsusb failed for device {device_id}: {result.stderr.decode()}")
+            return {
+                "type": "deviceInfo",
+                "lsusb_output": "Error retrieving lsusb data.",
+                "is_storage": False
+            }
+
     except Exception as e:
-        print(f"Error accessing device info: {e}")
-    return None
+        print(f"Error processing device {device.device_node}: {e}")
+        return None
+
 
 
 def get_block_device_from_device_node(device_node):
@@ -148,21 +154,22 @@ async def monitor_usb_devices(websocket, event_queue):
     def sync_monitor():
         """Synchronous USB monitoring to be run in a separate thread."""
         for device in iter(monitor.poll, None):
-            if device.action == 'add' and 'DEVNAME' in device:
+            if device.action == 'add':
                 return device  # Return the device when added
 
     while True:
-        # Run the blocking monitor in a thread and await the result
         device = await asyncio.to_thread(sync_monitor)
         if not device:
-            continue  # Skip if no device is found
+            continue
 
         print(f"Device added: {device.device_node}")
         device_info = get_device_info(device)
+
         if not device_info:
+            print(f"Skipping device {device.device_node} due to missing info.")
             continue
 
-        # Send LSUSB data to the backend
+        # Send device info to the backend
         try:
             await websocket.send(json.dumps(device_info))
             print(f"Sent device info to backend: {device_info}")
@@ -170,7 +177,7 @@ async def monitor_usb_devices(websocket, event_queue):
             print("WebSocket connection closed. Cannot send device info.")
             break
 
-        # If the device is a storage device, proceed with mounting and data transfer
+        # Mount and process storage devices
         if device_info.get("is_storage"):
             mount_point = mount_usb_device(device.device_node)
             if not mount_point:
@@ -183,6 +190,7 @@ async def monitor_usb_devices(websocket, event_queue):
             else:
                 print("File transfer failed.")
             unmount_device(mount_point)
+
 
 
 async def reconnect():
