@@ -5,7 +5,6 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const app = express();
 const port = 3000;
-const { postTestFiles, postFile } = require('./clusterServiceScripts.js'); 
 
 // Constants for file paths and scripts
 const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
@@ -43,28 +42,25 @@ wss.on('connection', (ws, req) => {
                 const data = JSON.parse(message);
                 console.log('Received message from Pi:', data);
 
-                // Handle device info and trigger feature extraction and scanning
+                // Handle LSUSB data for all devices
                 if (data.type === 'deviceInfo') {
                     console.log('Received USB device info:', data.lsusb_output);
 
-                    // Forward to the frontend
+                    // Forward LSUSB data to the frontend
                     if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                        frontendClient.send(JSON.stringify({ type: 'deviceInfo', lsusb_output: data.lsusb_output }));
-                        console.log("USB device info forwarded to frontend.");
+                        frontendClient.send(JSON.stringify({
+                            type: "deviceInfo",
+                            lsusb_output: data.lsusb_output
+                        }));
+                        console.log("Sent device info to frontend.");
+                    }
+
+                    // If the device is not a storage device, stop here
+                    if (!data.is_storage) {
+                        console.log("Non-storage device detected. No further processing.");
+                        return;
                     }
                 }
-
-                if (data.type === 'usbStatus') {
-                    console.log('Received USB status:', data.status);
-
-                    // Forward USB status to the frontend
-                    if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                        frontendClient.send(JSON.stringify({ type: 'usbStatus', status: data.status }));
-                        console.log("USB status forwarded to frontend.");
-                    }
-                }
-
-
 
                 // Handle file list for validation and scanning
                 if (data.type === 'fileList') {
@@ -201,21 +197,3 @@ function runFeatureExtractionAndScanning() {
         });
     });
 }
-
-function runTest() {
-    console.log("Running test...");   
-    try {
-        postTestFiles().then((findings) => {
-            console.log("Findings:", findings);
-        });
-    } catch (error) {
-        console.error('Error parsing device info:', error);
-    }
-}
-
-// Check for command-line arguments
-const args = process.argv.slice(2);
-if (args.includes("test")) {
-    runTest();
-}
-
