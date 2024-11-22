@@ -39,6 +39,13 @@ function initializeWebSocket() {
             updateUSBStatus();
         }
 
+        if (data.type === "deviceInfo") {
+            console.log("Received device info:", data.lsusb_output);
+            console.log('Updating UI with device info:', data.deviceInfo);
+            showButtonPanel();
+            updateDeviceStatus(`Device Info: ${JSON.stringify(data.lsusb_output)}`);
+        }
+
 
         if (data.type === "scanningResults") {
             console.log("Received scanning results:", data.results);
@@ -46,14 +53,6 @@ function initializeWebSocket() {
 
         }
 
-        // Show buttons and update device info if available
-        if (data.showButtons) {
-            console.log('`showButtons` is true. Updating UI with device info:', data.deviceInfo);
-            showButtonPanel();
-            updateDeviceStatus(`Device Info: ${JSON.stringify(data.deviceInfo)}`);
-        } else {
-            console.warn('`showButtons` is missing or false:', data);
-        }
     });
 
     // Handle connection close
