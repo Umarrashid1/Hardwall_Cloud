@@ -33,12 +33,18 @@ function initializeWebSocket() {
         }
 
         // Handle USB status updates
-        if (data.usbStatus !== undefined) {
-            console.log('USB status update received:', data.usbStatus);
-            usbStatus = data.usbStatus;
+        if (data.type !== undefined) {
+            console.log('USB status update received:', data.status);
+            usbStatus = data.status;
             updateUSBStatus();
         }
 
+        if (data.type === "deviceInfo") {
+            console.log("Received device info:", data.lsusb_output);
+            console.log('Updating UI with device info:', data.deviceInfo);
+            showButtonPanel();
+            updateDeviceStatus(`Device Info: ${JSON.stringify(data.lsusb_output)}`);
+        }
 
         if (data.type === "scanningResults") {
             console.log("Received scanning results:", data.results);
@@ -46,14 +52,6 @@ function initializeWebSocket() {
 
         }
 
-        // Show buttons and update device info if available
-        if (data.showButtons) {
-            console.log('`showButtons` is true. Updating UI with device info:', data.deviceInfo);
-            showButtonPanel();
-            updateDeviceStatus(`Device Info: ${JSON.stringify(data.deviceInfo)}`);
-        } else {
-            console.warn('`showButtons` is missing or false:', data);
-        }
     });
 
     // Handle connection close
@@ -97,13 +95,18 @@ function updateUIBasedOnPiStatus() {
 
 // Update the USB status display
 function updateUSBStatus() {
+    console.log("Executing updateUSBStatus...");
     const usbStatusElement = document.getElementById("usbStatus");
+    console.log("usbStatusElement found:", usbStatusElement); // Log the element
+    console.log("Current usbStatus value:", usbStatus); // Log the status value
     if (usbStatusElement) {
         usbStatusElement.textContent = `USB Status: ${usbStatus}`;
+        console.log("Updated USB status in DOM to:", usbStatusElement.textContent); // Confirm update
     } else {
         console.error("`usbStatus` element not found in the DOM.");
     }
 }
+
 
 // Event listeners for block and allow buttons
 document.getElementById("blockButton").addEventListener("click", () => {
