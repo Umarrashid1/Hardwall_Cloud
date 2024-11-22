@@ -3,7 +3,7 @@ const fs = require('fs');
 const FormData = require('form-data');
 
 // TODO: Update this address to match kube service address
-const featureExtractorAddress = 'http://example.com/malpredict';
+const featureExtractorAddress = 'http://example.com/malpredict/';
 
 async function postFile(fileInput) {
     var formData = new FormData();
@@ -19,7 +19,6 @@ async function postFile(fileInput) {
             },
             timeout: 60000  // Increase timeout to 60 seconds
         });
-        console.log('Response:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error posting file to Flask:', error);
@@ -67,7 +66,7 @@ function postTestFiles() {
                     findings.push(item[1]);
                 }
                 for (const item of findings) {
-                    item['results'] = item['results'][0];
+                    item['results'] = item['results'];
                 }
                 console.log('findings:', findings);
                 resolve(findings);
