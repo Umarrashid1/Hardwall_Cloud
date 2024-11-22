@@ -19,7 +19,6 @@ async function postFile(fileInput) {
             },
             timeout: 60000  // Increase timeout to 60 seconds
         });
-        console.log('Response:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error posting file to Flask:', error);
@@ -67,7 +66,7 @@ function postTestFiles() {
                     findings.push(item[1]);
                 }
                 for (const item of findings) {
-                    item['results'] = item['results'][0];
+                    item['results'] = item['results'];
                 }
                 console.log('findings:', findings);
                 resolve(findings);
