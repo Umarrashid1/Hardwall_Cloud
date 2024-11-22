@@ -1,9 +1,13 @@
 const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
+const { json } = require('body-parser');
 
 // TODO: Update this address to match kube service address
-const featureExtractorAddress = 'http://example.com/malpredict/';
+const ingressAddress = 'http://example.com';
+const featureExtractorAddress = ingressAddress + '/malpredict/';
+const hardwallConfigAddress = ingressAddress + '/config-hardwall/';
+const cloudConfigAddress = ingressAddress + '/config-cloud/';
 
 async function postFile(fileInput) {
     var formData = new FormData();
@@ -83,5 +87,21 @@ function postTestFiles() {
     });
 }
 
+function postHardwallConfig(config) {
+    return 'Feature not implemented';
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios.post(hardwallConfigAddress, config, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            resolve(response.data);
+        } catch (error) {
+            console.error('Error posting hardwall config:', error);
+            reject(error);
+        }
+    });
+}
 // Export the functions using CommonJS syntax
-module.exports = { postFile, postTestFiles };
+module.exports = { postFile, postTestFiles, postHardwallConfig };
