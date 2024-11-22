@@ -1,3 +1,4 @@
+cat hardwall_device_code.py
 import os
 import subprocess
 import pyudev
@@ -83,7 +84,7 @@ def gather_files(mount_point):
     return files
 
 
-async def transfer_files_with_confirmation(file_list, websocket):
+async def transfer_files_with_confirmation(file_list, websocket, event_queue):
     """Transfer files to the backend via SCP and wait for validation."""
     try:
         # Transfer files using SCP
@@ -102,14 +103,17 @@ async def transfer_files_with_confirmation(file_list, websocket):
         await websocket.send(json.dumps({"type": "fileList", "files": file_list_payload}))
         print("Sent file list to backend for validation.")
 
-        # Wait for backend validation response
-        response = await asyncio.wait_for(websocket.recv(), timeout=30)
-        validation_result = json.loads(response)
-        if validation_result.get("action") == "fileReceived" and validation_result.get("status") == "success":
-            print("File validation successful.")
-            return True
-        else:
-            print("File validation failed.")
+        # Wait for validation response from the event queue
+        try:
+            validation_result = await asyncio.wait_for(event_queue.get(), timeout=30)
+            if validation_result.get("action") == "fileReceived" and validation_result.get("status") == "success":
+                print("File validation successful.")
+                return True
+            else:
+                print("File validation failed.")
+                return False
+        except asyncio.TimeoutError:
+            print("Timeout waiting for backend validation response.")
             return False
 
     except Exception as e:
@@ -126,7 +130,7 @@ def unmount_device(mount_point):
         print(f"Failed to unmount {mount_point}: {e}")
 
 
-async def monitor_usb_devices(websocket):
+async def monitor_usb_devices(websocket, event_queue):
     """Monitor USB devices asynchronously and send info to the backend."""
     context = pyudev.Context()
     monitor = pyudev.Monitor.from_netlink(context)
@@ -164,7 +168,7 @@ async def monitor_usb_devices(websocket):
             continue
 
         file_list = gather_files(mount_point)
-        success = await transfer_files_with_confirmation(file_list, websocket)
+        success = await transfer_files_with_confirmation(file_list, websocket, event_queue)  # Pass event_queue
         if success:
             print("Files transferred and validated. Proceeding with unmount.")
         else:
@@ -179,36 +183,12 @@ async def reconnect():
             async with websockets.connect(BACKEND_URI, extra_headers=HEADERS) as websocket:
                 print("Connected to backend.")
 
-                # Coroutine to handle backend messages
-                async def handle_backend_commands():
-                    """Handle backend commands and confirm the USB state."""
-                    while True:
-                        try:
-                            message = await websocket.recv()
-                            print(f"Received message from backend: {message}")
-                            command = json.loads(message)
-
-                            if command.get("action") == "block":
-                                print("Received block command from backend.")
-                                # Implement block logic here
-                                status_update = {"type": "usbStatus", "status": "blocked"}
-                                await websocket.send(json.dumps(status_update))
-
-                            elif command.get("action") == "allow":
-                                print("Received allow command from backend.")
-                                # Implement allow logic here
-                                status_update = {"type": "usbStatus", "status": "allowed"}
-                                await websocket.send(json.dumps(status_update))
-                        except websockets.exceptions.ConnectionClosed:
-                            print("Backend connection closed during command handling.")
-                            raise  # Trigger reconnection
-                        except json.JSONDecodeError:
-                            print("Received invalid JSON from backend.")
+                event_queue = asyncio.Queue()
 
                 # Run USB monitoring and backend commands concurrently
                 await asyncio.gather(
-                    handle_backend_commands(),
-                    monitor_usb_devices(websocket)
+                    handle_backend_commands(websocket, event_queue),
+                    monitor_usb_devices(websocket, event_queue)
                 )
         except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError) as e:
             print(f"Connection to backend lost: {e}. Retrying in 5 seconds...")
@@ -216,6 +196,37 @@ async def reconnect():
         except Exception as e:
             print(f"Unexpected error during reconnection: {e}. Retrying in 5 seconds...")
             await asyncio.sleep(5)
+
+
+async def handle_backend_commands(websocket, event_queue):
+    """Handle backend commands and confirm the USB state."""
+    while True:
+        try:
+            message = await websocket.recv()
+            print(f"Received message from backend: {message}")
+            command = json.loads(message)
+
+            # Pass validation results to the event queue
+            if command.get("action") == "fileReceived":
+                await event_queue.put(command)
+                continue
+
+            # Handle other backend commands
+            if command.get("action") == "block":
+                print("Received block command from backend.")
+                status_update = {"type": "usbStatus", "status": "blocked"}
+                await websocket.send(json.dumps(status_update))
+
+            elif command.get("action") == "allow":
+                print("Received allow command from backend.")
+                status_update = {"type": "usbStatus", "status": "allowed"}
+                await websocket.send(json.dumps(status_update))
+
+        except websockets.exceptions.ConnectionClosed:
+            print("WebSocket connection closed during command handling.")
+            break
+        except json.JSONDecodeError:
+            print("Received invalid JSON from backend.")
 
 
 if __name__ == "__main__":

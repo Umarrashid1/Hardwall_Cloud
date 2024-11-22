@@ -46,7 +46,25 @@ wss.on('connection', (ws, req) => {
                 // Handle device info and trigger feature extraction and scanning
                 if (data.type === 'deviceInfo') {
                     console.log('Received USB device info:', data.lsusb_output);
+
+                    // Forward to the frontend
+                    if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                        frontendClient.send(JSON.stringify({ type: 'deviceInfo', lsusb_output: data.lsusb_output }));
+                        console.log("USB device info forwarded to frontend.");
+                    }
                 }
+
+                if (data.type === 'usbStatus') {
+                    console.log('Received USB status:', data.status);
+
+                    // Forward USB status to the frontend
+                    if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                        frontendClient.send(JSON.stringify({ type: 'usbStatus', status: data.status }));
+                        console.log("USB status forwarded to frontend.");
+                    }
+                }
+
+
 
                 // Handle file list for validation and scanning
                 if (data.type === 'fileList') {
