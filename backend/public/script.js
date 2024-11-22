@@ -128,7 +128,7 @@ document.getElementById("allowButton").addEventListener("click", () => {
 });
 
 document.getElementById("configButton").addEventListener("click", () => {
-    window.location.href = "./config_page/configpage.html";
+    window.location.href = "./configpage.html";
 });
 
 // Utility functions for UI updates
