@@ -14,9 +14,10 @@ kubectl apply -f ./kubernetes/main_yamls/
 echo "Minikube started and Kubernetes configurations applied successfully."
 kubectl get all
 
+
+sleep 5
 alias kub="minikube kubectl --"
 echo "minikube kubectl abbreviated as kub"
-sleep 5
 minikube ip
 #kubectl port-forward service/backend-service 8080:3000
 # minikube tunnelmin

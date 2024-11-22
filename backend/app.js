@@ -5,6 +5,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const app = express();
 const port = 3000;
+const { postTestFiles, postFile } = require('./clusterServiceScripts.js'); 
 
 // Constants for file paths and scripts
 const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
@@ -197,3 +198,19 @@ function runFeatureExtractionAndScanning() {
         });
     });
 }
+
+function runTest() {
+    console.log("Running test...");   
+    postTestFiles().then((findings) => {
+        console.log('Test files processed:', findings);
+    }).catch((error) => {
+        console.error('Error processing test files:', error);
+    });
+}
+
+// Check for command-line arguments
+const args = process.argv.slice(2);
+if (args.includes("test")) {
+    runTest();
+}
+
