@@ -186,13 +186,11 @@ function runFeatureExtractionAndScanning() {
 
 function runTest() {
     console.log("Running test...");   
-    try {
-        postTestFiles().then((findings) => {
-            console.log("Findings:", findings);
-        });
-    } catch (error) {
-        console.error('Error parsing device info:', error);
-    }
+    postTestFiles().then((findings) => {
+        console.log('Test files processed:', findings);
+    }).catch((error) => {
+        console.error('Error processing test files:', error);
+    });
 }
 
 // Check for command-line arguments
