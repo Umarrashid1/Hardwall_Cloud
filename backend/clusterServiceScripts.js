@@ -62,13 +62,16 @@ function postTestFiles() {
             try {
                 const data = Object.entries(response);
                 const findings = [];
+                console.log('printing data:\n',data,'\n\n');
                 for (const item of data) {
                     findings.push(item[1]);
                 }
-                for (const item of findings) {
-                    item['results'] = item['results'];
-                }
                 console.log('findings:', findings);
+                for (field of findings) {
+                    field['results'] = field['results'][0];
+                    console.log('field:', field);
+                }
+
                 resolve(findings);
             } catch (error) {
                 console.error('Error parsing device info:', error);
