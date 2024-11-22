@@ -6,40 +6,40 @@
     <title>USB Status Monitor</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<div id="sidePanel">
-    <button id="configButton" >Configure Hardwall</button>
-    <button id="restartButton" disabled>Restart Device</button>
-    <div id="container">
-        <header>
-            <h1>USB Status Monitor</h1>
-        </header>
+    <body>
+        <div id="sidePanel">
+            <button id="configButton" >Configure Hardwall</button>
+            <button id="restartButton" disabled>Restart Device</button>
 
-        <main>
-            <div id="statusPanel">
-                <p id="deviceStatusText">Awaiting Pi connection...</p>
-                <div id="usbStatusContainer">
-                    <p id="usbStatus">USB Status: Unknown</p>
+            <div id="container">
+                <header>
+                    <h1>USB Status Monitor</h1>
+                </header>
+
+                <main>
+                    <div id="statusPanel">
+                        <p id="deviceStatusText">Awaiting Pi connection...</p>
+                        <div id="usbStatusContainer">
+                            <p id="usbStatus">USB Status: Unknown</p>
+                        </div>
+                    </div>
+
+                    <div id="buttonPanel">
+                        <button id="blockButton" disabled>Block USB</button>
+                        <button id="allowButton" disabled>Allow USB</button>
+                    </div>
+                </main>
+
+                <div id="scannerPanel">
+                    <h1> Scanner status </h1>
                 </div>
+                <main>
+                    <p id="scannerOutput">N/A</p>
+                </main>
             </div>
+        </div>
 
-            <div id="scannerPanel">
-                <p id="scannerStatus" disabled>Scanning </p>
-                <p id="scannerOutput">Scanner output:</p>
-            </div>
-
-            <div id="buttonPanel">
-                <button id="blockButton" disabled>Block USB</button>
-                <button id="allowButton" disabled>Allow USB</button>
-            </div>
-        </main>
-
-        <footer>
-            <p>&copy; 2024 USB Monitor</p>
-        </footer>
-    </div>
-
-    <script src="script.js"></script>
-</body>
+        <script src="script.js"></script>
+    </body>
 </html>
 
