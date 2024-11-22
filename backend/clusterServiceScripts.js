@@ -3,7 +3,7 @@ const fs = require('fs');
 const FormData = require('form-data');
 
 // TODO: Update this address to match kube service address
-const featureExtractorAddress = 'http://example.com/malpredict';
+const featureExtractorAddress = 'http://example.com/malpredict/';
 
 async function postFile(fileInput) {
     var formData = new FormData();
