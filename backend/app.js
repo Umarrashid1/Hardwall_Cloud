@@ -15,7 +15,7 @@ const SCANNING_RESULTS = "../malware_predict/scanning_results.json";
 
 
 // Global cache for storing device info
-const deviceInfoCache = null
+let deviceInfoCache = null
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
