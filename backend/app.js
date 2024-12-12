@@ -15,7 +15,7 @@ const SCANNING_RESULTS = "../malware_predict/scanning_results.json";
 
 
 // Global cache for storing device info
-const deviceInfoCache = {};
+const deviceInfoCache = null
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -50,15 +50,11 @@ wss.on('connection', (ws, req) => {
                 if (data.type === 'device_summary') {
                     console.log('Received device summary:', data.device_info);
 
-                    // Store device_info in the cache, keyed by devpath or another unique identifier
-                    const parsedDeviceInfo = parseDeviceInfo(data.device_info);
-                    if (parsedDeviceInfo) {
-                        const devpath = parsedDeviceInfo.devpath;
-                        deviceInfoCache[devpath] = parsedDeviceInfo;
-                        console.log(`Cached device info for ${devpath}:`, parsedDeviceInfo);
-                    } else {
+                        deviceInfoCache = data;
+                        console.log(`Cached device info for :`, data);
+
                         console.error("Failed to cache device info due to parsing error.");
-                    }
+
 
 
                     // Forward LSUSB data to the frontend
@@ -148,8 +144,7 @@ wss.on('connection', (ws, req) => {
                         console.log('Sending allow command to Pi');
 
                         // Retrieve the device_info from the cache
-                        const devpath = data.devpath; // Assume frontend includes devpath to identify the device
-                        const deviceInfo = deviceInfoCache[devpath];
+                        const deviceInfo = deviceInfoCache;
 
                         if (deviceInfo) {
                             // Send the allow command with the cached device info
@@ -157,9 +152,9 @@ wss.on('connection', (ws, req) => {
                                 action: 'allow',
                                 device_info: deviceInfo
                             }));
-                            console.log(`Sent allow command with device info for ${devpath}`);
+                            console.log(`Sent allow command with device info for`);
                         } else {
-                            console.error(`Device info for ${devpath} not found in cache.`);
+                            console.error(`Device info not found in cache.`);
                         }
                     } else if (data.action === 'block') {
                         console.log('Sending block command to Pi');
