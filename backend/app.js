@@ -51,11 +51,15 @@ wss.on('connection', (ws, req) => {
                     console.log('Received device summary:', data.device_info);
 
                     // Store device_info in the cache, keyed by devpath or another unique identifier
-                    const devpath = data.device_info.devpath;
-                    if (devpath) {
-                        deviceInfoCache[devpath] = data.device_info;
-                        console.log(`Cached device info for ${devpath}`);
+                    const parsedDeviceInfo = parseDeviceInfo(data.device_info);
+                    if (parsedDeviceInfo) {
+                        const devpath = parsedDeviceInfo.devpath;
+                        deviceInfoCache[devpath] = parsedDeviceInfo;
+                        console.log(`Cached device info for ${devpath}:`, parsedDeviceInfo);
+                    } else {
+                        console.error("Failed to cache device info due to parsing error.");
                     }
+
 
                     // Forward LSUSB data to the frontend
                     if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
@@ -181,6 +185,23 @@ server.on('upgrade', (request, socket, head) => {
         wss.emit('connection', ws, request);
     });
 });
+function parseDeviceInfo(deviceInfoString) {
+    const regex = /Device Type: (?<device_type>\w+), Path: (?<devpath>[^,]+), Vendor ID: (?<vendor_id>\w+), Product ID: (?<product_id>\w+), Drivers: (?<drivers>.*)/;
+    const match = deviceInfoString.match(regex);
+
+    if (match && match.groups) {
+        return {
+            device_type: match.groups.device_type,
+            devpath: match.groups.devpath,
+            vendor_id: match.groups.vendor_id,
+            product_id: match.groups.product_id,
+            drivers: match.groups.drivers
+        };
+    } else {
+        console.error("Failed to parse device_info string:", deviceInfoString);
+        return null;
+    }
+}
 
 // Function to run feature extraction and scanning
 function runFeatureExtractionAndScanning() {
