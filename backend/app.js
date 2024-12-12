@@ -13,6 +13,10 @@ const FEATURE_EXTRACTION_SCRIPT = "../malware_predict/feature_extraction.py";
 const SCANNING_SCRIPT = "../malware_predict/run_scanner.py";
 const SCANNING_RESULTS = "../malware_predict/scanning_results.json";
 
+
+// Global cache for storing device info
+const deviceInfoCache = {};
+
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -43,9 +47,15 @@ wss.on('connection', (ws, req) => {
                 const data = JSON.parse(message);
                 console.log('Received message from Pi:', data);
 
-                // Handle LSUSB data for all devices
                 if (data.type === 'device_summary') {
                     console.log('Received device summary:', data.device_info);
+
+                    // Store device_info in the cache, keyed by devpath or another unique identifier
+                    const devpath = data.device_info.devpath;
+                    if (devpath) {
+                        deviceInfoCache[devpath] = data.device_info;
+                        console.log(`Cached device info for ${devpath}`);
+                    }
 
                     // Forward LSUSB data to the frontend
                     if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
@@ -130,15 +140,27 @@ wss.on('connection', (ws, req) => {
 
                 // Forward commands to the Pi
                 if (piClient && piClient.readyState === WebSocket.OPEN) {
-                    if (data.action === 'block') {
+                    if (data.action === 'allow') {
+                        console.log('Sending allow command to Pi');
+
+                        // Retrieve the device_info from the cache
+                        const devpath = data.devpath; // Assume frontend includes devpath to identify the device
+                        const deviceInfo = deviceInfoCache[devpath];
+
+                        if (deviceInfo) {
+                            // Send the allow command with the cached device info
+                            piClient.send(JSON.stringify({
+                                action: 'allow',
+                                device_info: deviceInfo
+                            }));
+                            console.log(`Sent allow command with device info for ${devpath}`);
+                        } else {
+                            console.error(`Device info for ${devpath} not found in cache.`);
+                        }
+                    } else if (data.action === 'block') {
                         console.log('Sending block command to Pi');
                         piClient.send(JSON.stringify({ action: 'block' }));
-                    } else if (data.action === 'allow') {
-                        console.log('Sending allow command to Pi');
-                        piClient.send(JSON.stringify({ action: 'allow' }));
                     }
-                } else {
-                    console.error('No Pi connected to handle the command.');
                 }
             } catch (error) {
                 console.error('Error parsing frontend message:', error);
