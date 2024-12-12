@@ -44,20 +44,22 @@ wss.on('connection', (ws, req) => {
                 console.log('Received message from Pi:', data);
 
                 // Handle LSUSB data for all devices
-                if (data.type === 'deviceInfo') {
-                    console.log('Received USB device info:', data.lsusb_output);
+                if (data.type === 'device_summary') {
+                    console.log('Received device summary:', data.device_info);
 
                     // Forward LSUSB data to the frontend
                     if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                         frontendClient.send(JSON.stringify({
-                            type: "deviceInfo",
-                            lsusb_output: data.lsusb_output
+                            type: "device_summary",
+                            device_info: data.device_info,
+                            event_history: data.event_history
                         }));
-                        console.log("Sent device info to frontend.");
+                        console.log("Sent device summary to frontend.");
                     }
 
                     // If the device is not a storage device, stop here
-                    if (!data.is_storage) {
+                    const isStorageDevice = data.device_info.includes('usb-storage');
+                    if (!isStorageDevice) {
                         console.log("Non-storage device detected. No further processing.");
                         return;
                     }
