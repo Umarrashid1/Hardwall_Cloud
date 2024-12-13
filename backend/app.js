@@ -33,10 +33,84 @@ let piClient = null;
 
 function parseKeypressData(keypressData) {
     const HID_KEYCODES = {
-        "4": 65, // A
-        "5": 66, // B
-        "6": 67, // C
-        // Add more HID mappings as needed
+        "4": 65,  // A
+        "5": 66,  // B
+        "6": 67,  // C
+        "7": 68,  // D
+        "8": 69,  // E
+        "9": 70,  // F
+        "10": 71, // G
+        "11": 72, // H
+        "12": 73, // I
+        "13": 74, // J
+        "14": 75, // K
+        "15": 76, // L
+        "16": 77, // M
+        "17": 78, // N
+        "18": 79, // O
+        "19": 80, // P
+        "20": 81, // Q
+        "21": 82, // R
+        "22": 83, // S
+        "23": 84, // T
+        "24": 85, // U
+        "25": 86, // V
+        "26": 87, // W
+        "27": 88, // X
+        "28": 89, // Y
+        "29": 90, // Z
+
+        // Numbers
+        "30": 49, // 1
+        "31": 50, // 2
+        "32": 51, // 3
+        "33": 52, // 4
+        "34": 53, // 5
+        "35": 54, // 6
+        "36": 55, // 7
+        "37": 56, // 8
+        "38": 57, // 9
+        "39": 48, // 0
+
+        // Special Characters
+        "40": 13,  // Enter
+        "41": 27,  // Escape
+        "42": 8,   // Backspace
+        "43": 9,   // Tab
+        "44": 32,  // Space
+        "45": 45,  // -
+        "46": 61,  // =
+        "47": 91,  // [
+        "48": 93,  // ]
+        "49": 92,  // \
+        "50": 59,  // ;
+        "51": 39,  // '
+        "52": 96,  // `
+        "53": 44,  // ,
+        "54": 46,  // .
+        "55": 47,  // /
+
+        // Function Keys
+        "58": 112, // F1
+        "59": 113, // F2
+        "60": 114, // F3
+        "61": 115, // F4
+        "62": 116, // F5
+        "63": 117, // F6
+        "64": 118, // F7
+        "65": 119, // F8
+        "66": 120, // F9
+        "67": 121, // F10
+        "68": 122, // F11
+        "69": 123, // F12
+
+        // Control Keys
+        "224": 17, // Ctrl
+        "225": 16, // Shift
+        "226": 18, // Alt
+        "227": 91, // Left Windows/Command
+        "228": 92, // Right Windows/Command
+        "229": 93  // Menu
     };
 
     const results = []; // Array to store VK, HT, and FT
@@ -86,6 +160,44 @@ function parseKeypressData(keypressData) {
     return results;
 }
 
+function processKeypressData(keypressData) {
+    const results = parseKeypressData(keypressData);
+
+    console.log("Formatted Keypress Data:", results);
+
+    // Convert results to JSON string to pass as an argument
+    const inputData = JSON.stringify(results);
+
+    // Path to your Python script
+    const PYTHON_SCRIPT = "./preprocess_predict.py";
+
+    // Execute the Python script
+    exec(`python3 ${PYTHON_SCRIPT} '${inputData}'`, (error, stdout, stderr) => {
+        if (error) {
+            console.error("Error during Python script execution:", error.message);
+            return;
+        }
+
+        if (stderr) {
+            console.error("Python script error output:", stderr);
+            return;
+        }
+
+        // Parse and log the predictions
+        try {
+            const predictions = JSON.parse(stdout);
+            console.log("AI Predictions:", predictions);
+
+            // Send predictions to the frontend or log them
+            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
+            }
+        } catch (parseError) {
+            console.error("Error parsing Python script output:", parseError.message);
+        }
+    });
+}
+
 wss.on('connection', (ws, req) => {
     ws.isPiConnection = req.headers['x-device-type'] === 'Pi'; // Identify if the connection is from a Pi
 
@@ -107,13 +219,8 @@ wss.on('connection', (ws, req) => {
                     console.log("Received keypress data:", data.data);
 
                     // Process keypress data
-                    const results = parseKeypressData(data.data);
+                    processKeypressData(data.data);
 
-                    // Log results (can send to frontend if needed)
-                    console.log("Processed Keypress Data:");
-                    results.forEach((result, index) => {
-                        console.log(`Row ${index + 1}: VK=${result.VK}, HT=${result.HT}ms, FT=${result.FT}ms`);
-                    });
                 }
 
                 if (data.type === 'device_summary') {
