@@ -39,38 +39,50 @@ function parseKeypressData(keypressData) {
         // Add more HID mappings as needed
     };
 
-    const heldKeys = {}; // Tracks keys currently held down with their press timestamp
     const results = []; // Array to store VK, HT, and FT
-    let lastReleaseTime = null;
+    let lastReleaseTime = null; // Tracks the last release timestamp
+    let currentlyHeldKey = null; // Tracks the currently held key
+    let pressTime = null; // Tracks the timestamp of the current press
 
-    // Process each keypress event
     keypressData.forEach((event) => {
         const timestamp = new Date(event.timestamp).getTime(); // Convert timestamp to milliseconds
-        const keys = event.data;
+        const key = event.data[2]; // Key is always in the third position
 
-        keys.forEach((key) => {
-            if (key !== "0" && !heldKeys[key]) {
-                // Key is pressed
-                heldKeys[key] = timestamp;
-            } else if (key === "0" && heldKeys[key]) {
-                // Key is released
-                const pressTime = heldKeys[key];
-                const holdTime = timestamp - pressTime; // Calculate HT (Hold Time)
-                const flightTime = lastReleaseTime ? pressTime - lastReleaseTime : -1; // Calculate FT (Flight Time)
+        if (key !== "0") {
+            // Key pressed
+            console.log(`Key pressed: ${key}, Timestamp: ${timestamp}`);
+            currentlyHeldKey = key;
+            pressTime = timestamp; // Record the press timestamp
 
-                results.push({
-                    VK: HID_KEYCODES[key] || `Unknown(${key})`, // Virtual Keycode
-                    HT: holdTime, // Hold Time in ms
-                    FT: flightTime, // Flight Time in ms
-                });
-
-                lastReleaseTime = timestamp; // Update last release time
-                delete heldKeys[key]; // Remove key from held keys
+            // Calculate Flight Time (FT)
+            let flightTime = null;
+            if (lastReleaseTime !== null) {
+                flightTime = timestamp - lastReleaseTime;
             }
-        });
+
+            results.push({
+                VK: HID_KEYCODES[key] || `Unknown(${key})`,
+                HT: null, // HT will be calculated on release
+                FT: flightTime, // FT is time from last release to this press
+            });
+        } else if (currentlyHeldKey) {
+            // Key released
+            console.log(`Key released: ${currentlyHeldKey}, Timestamp: ${timestamp}`);
+
+            const pressResult = results[results.length - 1];
+
+            if (pressResult && pressResult.HT === null) {
+                // Calculate Hold Time (HT)
+                let holdTime = timestamp - pressTime;
+                pressResult.HT = holdTime;
+            }
+
+            lastReleaseTime = timestamp; // Update last release time
+            currentlyHeldKey = null; // Reset the currently held key
+        }
     });
 
-    // Return the processed results
+    console.log("Processed Results:", results);
     return results;
 }
 
