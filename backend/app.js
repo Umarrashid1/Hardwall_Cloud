@@ -31,6 +31,7 @@ const wss = new WebSocket.Server({ noServer: true });
 let frontendClient = null;
 let piClient = null;
 
+let lastReleaseTimeGlobal = null;
 
 function parseKeypressData(keypressData) {
     const HID_KEYCODES = {
@@ -134,8 +135,8 @@ function parseKeypressData(keypressData) {
             if (lastReleaseTime !== null) {
                 flightTime = timestamp - lastReleaseTime;
             }
-            if (flightTime > 1500){
-                flightTime = -1
+            if (flightTime > 1500) {
+                flightTime = -1;
             }
 
             results.push({
@@ -169,37 +170,18 @@ function processKeypressData(keypressData) {
 
     console.log("Formatted Keypress Data:", results);
 
-    // Convert results to JSON string to pass as an argument
-    const inputData = JSON.stringify(results);
+    // Format the output to match the desired style
+    let formattedOutput = "VK,HT,FT\n";
 
-
-
-    // Execute the Python script
-    exec(`python3 ${KEYPRESS_DETECTION_SCRIPT} '${inputData}'`, (error, stdout, stderr) => {
-        if (error) {
-            console.error("Error during Python script execution:", error.message);
-            return;
-        }
-
-        if (stderr) {
-            console.error("Python script error output:", stderr);
-            return;
-        }
-
-        // Parse and log the predictions
-        try {
-            const predictions = JSON.parse(stdout);
-            console.log("AI Predictions:", predictions);
-
-            // Send predictions to the frontend or log them
-            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
-            }
-        } catch (parseError) {
-            console.error("Error parsing Python script output:", parseError.message);
-        }
+    results.forEach(result => {
+        const { VK, HT, FT } = result;
+        formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
     });
+
+    console.log("Formatted Output:", formattedOutput);
+    return formattedOutput;
 }
+
 
 wss.on('connection', (ws, req) => {
     ws.isPiConnection = req.headers['x-device-type'] === 'Pi'; // Identify if the connection is from a Pi
