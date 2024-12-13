@@ -30,6 +30,47 @@ const wss = new WebSocket.Server({ noServer: true });
 let frontendClient = null;
 let piClient = null;
 
+
+const HID_KEYCODES = {
+    "04": "A", "05": "B", "06": "C", "07": "D", "08": "E", // Add more as needed
+    "09": "F", "0A": "G", "0B": "H", "0C": "I", "0D": "J",
+    "2c": " "
+    // Complete the map with all HID keycodes.
+};
+
+function parseKeypressData(keypressData) {
+    const heldKeys = {}; // To track when keys are pressed and released
+    const keyEvents = []; // To store the parsed events
+
+    keypressData.forEach((event) => {
+        const timestamp = new Date(event.timestamp); // Convert to a Date object
+        const keys = event.data;
+        keys.forEach((key, index) => {
+            if (key !== "0" && !heldKeys[key]) {
+                // Key is pressed
+                heldKeys[key] = timestamp;
+                keyEvents.push({
+                    key: HID_KEYCODES[key] || `Unknown(${key})`,
+                    action: "pressed",
+                    timestamp: timestamp,
+                });
+            } else if (key === "0" && heldKeys[index]) {
+                // Key is released
+                const pressTime = (timestamp - heldKeys[index]) / 1000; // Time in seconds
+                keyEvents.push({
+                    key: HID_KEYCODES[key] || `Unknown(${key})`,
+                    action: "released",
+                    timestamp: timestamp,
+                    duration: pressTime,
+                });
+                delete heldKeys[key];
+            }
+        });
+    });
+
+    return keyEvents;
+}
+
 wss.on('connection', (ws, req) => {
     ws.isPiConnection = req.headers['x-device-type'] === 'Pi'; // Identify if the connection is from a Pi
 
@@ -49,6 +90,9 @@ wss.on('connection', (ws, req) => {
 
                 if (data.type === 'keypress_data') {
                     console.log(`Received keypress data:`, data.data);
+                    // Extract the relevant informationa
+                    parseKeypressData(data)
+
 
                 }
 
