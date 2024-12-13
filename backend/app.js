@@ -130,9 +130,12 @@ function parseKeypressData(keypressData) {
             pressTime = timestamp; // Record the press timestamp
 
             // Calculate Flight Time (FT)
-            let flightTime = null;
+            let flightTime = -1;
             if (lastReleaseTime !== null) {
                 flightTime = timestamp - lastReleaseTime;
+            }
+            if (flightTime > 1500){
+                flightTime = -1
             }
 
             results.push({
