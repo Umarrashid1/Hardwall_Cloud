@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nix-builder-service
+spec:
+  selector:
+    app: nix-builder
+  ports:
+  - protocol: TCP
+    port: 22 # External port
+    targetPort: 22 # Container port
+  type: LoadBalancer # Expose externally
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nix-remote-builder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nix-builder
+  template:
+    metadata:
+      labels:
+        app: nix-builder
+    spec:
+      containers:
+      - name: nix-builder
+        image: nixos/nix:latest
+        ports:
+        - containerPort: 22 # Expose SSH
+        volumeMounts:
+        - mountPath: /nix/store
+          name: nix-store
+        - mountPath: /root/.ssh/authorized_keys
+          subPath: authorized_keys
+          name: ssh-keys
+      volumes:
+      - name: nix-store
+        emptyDir: {}
+      - name: ssh-keys
+        configMap:
+          name: nix-builder-ssh-keys
+      
+
+---
+
+

@@ -103,5 +103,22 @@ function postHardwallConfig(config) {
         }
     });
 }
+
+
+function forceRemoteBuild() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios.post(cloudConfigAddress, {}, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            resolve(response.data);
+        } catch (error) {
+            console.error('Error posting cloud config:', error);
+            reject(error);
+        }
+    });
+}
 // Export the functions using CommonJS syntax
 module.exports = { postFile, postTestFiles, postHardwallConfig };

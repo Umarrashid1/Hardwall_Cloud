@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nix-builder-ssh-keys
+data:
+  authorized_keys: |
+    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDg11wGI33bnYHXWaRaRU6M+KOb4TU6wxG7rGCnDfBZqLa/Fzchl3TlHAk4HrooTAueNzZH33z4bj+8wTN8mbL/o0y5mSGS24Ch7tCOxmmdYUjMGBrWo8L0DutFrFF5+9FK6Q32CzXQKGUxscj628zxrs05NHSTql20uSUotLp7/L0CSPo6K18IDQ8bT5XPTJBsyaC7VJWdWLE27zoAaOBhJW0sb8Hx6z4oYuhxVx95zr+B/JsHKAYsdRmB9ygQ3ISKKhT3oR0cctZ1EnKP9KkElgv3kqYwE5hNwGZj+AHPtKikJIPafaqV0N3afO53DeyAcb9/vWTx9v43KipN9+1b nix@piDevice
