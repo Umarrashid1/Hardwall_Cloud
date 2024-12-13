@@ -179,7 +179,30 @@ function processKeypressData(keypressData) {
     });
 
     console.log("Formatted Output:", formattedOutput);
-    return formattedOutput;
+
+    // Execute the Python script
+    exec(`python3 ${KEYPRESS_DETECTION_SCRIPT} '${formattedOutput}'`, (error, stdout, stderr) => {
+        if (error) {
+            console.error("Error during Python script execution:", error.message);
+            return;
+        }
+        if (stderr) {
+            console.error("Python script error output:", stderr);
+            return;
+        }
+        // Parse and log the predictions
+        try {
+            const predictions = JSON.parse(stdout);
+            console.log("AI Predictions:", predictions);
+            // Send predictions to the frontend or log them
+            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
+            }
+        } catch (parseError) {
+            console.error("Error parsing Python script output:", parseError.message);
+        }
+    });
+
 }
 
 
