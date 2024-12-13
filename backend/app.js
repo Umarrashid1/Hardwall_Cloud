@@ -10,6 +10,7 @@ const { postTestFiles, postFile, postHardwallConfig } = require('./clusterServic
 // Constants for file paths and scripts
 const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
 const FEATURE_EXTRACTION_SCRIPT = "../malware_predict/feature_extraction.py";
+const KEYPRESS_DETECTION_SCRIPT = "../malware_predict/keypress_AI/predict.py"
 const SCANNING_SCRIPT = "../malware_predict/run_scanner.py";
 const SCANNING_RESULTS = "../malware_predict/scanning_results.json";
 
@@ -168,11 +169,10 @@ function processKeypressData(keypressData) {
     // Convert results to JSON string to pass as an argument
     const inputData = JSON.stringify(results);
 
-    // Path to your Python script
-    const PYTHON_SCRIPT = "./preprocess_predict.py";
+
 
     // Execute the Python script
-    exec(`python3 ${PYTHON_SCRIPT} '${inputData}'`, (error, stdout, stderr) => {
+    exec(`python3 ${KEYPRESS_DETECTION_SCRIPT} '${inputData}'`, (error, stdout, stderr) => {
         if (error) {
             console.error("Error during Python script execution:", error.message);
             return;
