@@ -88,26 +88,20 @@ wss.on('connection', (ws, req) => {
                 const data = JSON.parse(message);
                 console.log('Received message from Pi:', data);
 
-                if (parsedMessage.type === "keypress_data") {
-                    const keypressData = parsedMessage.data; // Access the 'data' array
+                if (data.type === 'keypress_data') {
+                    console.log(`Received keypress data:`, data.data);
+                    // Pass the `data.data` array (array of keypress events) to the parser
+                    const keyEvents = parseKeypressData(data.data);
 
-                    if (Array.isArray(keypressData)) {
-                        const keyEvents = parseKeypressData(keypressData);
-
-                        console.log("Parsed keypress events:");
-                        keyEvents.forEach((event) => {
-                            console.log(
-                                `Key: ${event.key}, Action: ${event.action}, Timestamp: ${event.timestamp}`
-                            );
-                            if (event.action === "released") {
-                                console.log(`Held for: ${event.duration.toFixed(2)} seconds`);
-                            }
-                        });
-                    } else {
-                        console.error("Invalid keypress data format: 'data' is not an array.");
-                    }
-                } else {
-                    console.warn("Unexpected message type:", parsedMessage.type);
+                    // Log parsed events for debugging
+                    keyEvents.forEach(event => {
+                        console.log(
+                            `Key: ${event.key}, Action: ${event.action}, Timestamp: ${event.timestamp}`
+                        );
+                        if (event.action === "released") {
+                            console.log(`Held for: ${event.duration.toFixed(2)} seconds`);
+                        }
+                    });
                 }
 
                 if (data.type === 'device_summary') {
