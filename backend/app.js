@@ -50,11 +50,8 @@ wss.on('connection', (ws, req) => {
                 if (data.type === 'device_summary') {
                     console.log('Received device summary:', data.device_info);
 
-                        deviceInfoCache = data;
-                        console.log(`Cached device info for :`, data);
-
-                        console.error("Failed to cache device info due to parsing error.");
-
+                    deviceInfoCache = data.device_info;
+                    console.log(`Cached device info:`, deviceInfoCache);
 
 
                     // Forward LSUSB data to the frontend
@@ -150,7 +147,10 @@ wss.on('connection', (ws, req) => {
                             // Send the allow command with the cached device info
                             piClient.send(JSON.stringify({
                                 action: 'allow',
-                                device_info: deviceInfo
+                                device_info: {
+                                    vendor_id: deviceInfo.vendor_id,
+                                    product_id: deviceInfo.product_id,
+                                }
                             }));
                             console.log(`Sent allow command with device info for`);
                         } else {
