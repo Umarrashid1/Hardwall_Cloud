@@ -31,44 +31,47 @@ let frontendClient = null;
 let piClient = null;
 
 
-const HID_KEYCODES = {
-    "04": "A", "05": "B", "06": "C", "07": "D", "08": "E", // Add more as needed
-    "09": "F", "0A": "G", "0B": "H", "0C": "I", "0D": "J",
-    "2c": " "
-    // Complete the map with all HID keycodes.
-};
-
 function parseKeypressData(keypressData) {
-    const heldKeys = {}; // To track when keys are pressed and released
-    const keyEvents = []; // To store the parsed events
+    const HID_KEYCODES = {
+        "4": 65, // A
+        "5": 66, // B
+        "6": 67, // C
+        // Add more HID mappings as needed
+    };
 
+    const heldKeys = {}; // Tracks keys currently held down with their press timestamp
+    const results = []; // Array to store VK, HT, and FT
+    let lastReleaseTime = null;
+
+    // Process each keypress event
     keypressData.forEach((event) => {
-        const timestamp = new Date(event.timestamp); // Convert to a Date object
+        const timestamp = new Date(event.timestamp).getTime(); // Convert timestamp to milliseconds
         const keys = event.data;
-        keys.forEach((key, index) => {
+
+        keys.forEach((key) => {
             if (key !== "0" && !heldKeys[key]) {
                 // Key is pressed
                 heldKeys[key] = timestamp;
-                keyEvents.push({
-                    key: HID_KEYCODES[key] || `Unknown(${key})`,
-                    action: "pressed",
-                    timestamp: timestamp,
-                });
-            } else if (key === "0" && heldKeys[index]) {
+            } else if (key === "0" && heldKeys[key]) {
                 // Key is released
-                const pressTime = (timestamp - heldKeys[index]) / 1000; // Time in seconds
-                keyEvents.push({
-                    key: HID_KEYCODES[key] || `Unknown(${key})`,
-                    action: "released",
-                    timestamp: timestamp,
-                    duration: pressTime,
+                const pressTime = heldKeys[key];
+                const holdTime = timestamp - pressTime; // Calculate HT (Hold Time)
+                const flightTime = lastReleaseTime ? pressTime - lastReleaseTime : -1; // Calculate FT (Flight Time)
+
+                results.push({
+                    VK: HID_KEYCODES[key] || `Unknown(${key})`, // Virtual Keycode
+                    HT: holdTime, // Hold Time in ms
+                    FT: flightTime, // Flight Time in ms
                 });
-                delete heldKeys[key];
+
+                lastReleaseTime = timestamp; // Update last release time
+                delete heldKeys[key]; // Remove key from held keys
             }
         });
     });
 
-    return keyEvents;
+    // Return the processed results
+    return results;
 }
 
 wss.on('connection', (ws, req) => {
@@ -88,19 +91,16 @@ wss.on('connection', (ws, req) => {
                 const data = JSON.parse(message);
                 console.log('Received message from Pi:', data);
 
-                if (data.type === 'keypress_data') {
-                    console.log(`Received keypress data:`, data.data);
-                    // Pass the `data.data` array (array of keypress events) to the parser
-                    const keyEvents = parseKeypressData(data.data);
+                if (data.type === "keypress_data") {
+                    console.log("Received keypress data:", data.data);
 
-                    // Log parsed events for debugging
-                    keyEvents.forEach(event => {
-                        console.log(
-                            `Key: ${event.key}, Action: ${event.action}, Timestamp: ${event.timestamp}`
-                        );
-                        if (event.action === "released") {
-                            console.log(`Held for: ${event.duration.toFixed(2)} seconds`);
-                        }
+                    // Process keypress data
+                    const results = parseKeypressData(data.data);
+
+                    // Log results (can send to frontend if needed)
+                    console.log("Processed Keypress Data:");
+                    results.forEach((result, index) => {
+                        console.log(`Row ${index + 1}: VK=${result.VK}, HT=${result.HT}ms, FT=${result.FT}ms`);
                     });
                 }
 
