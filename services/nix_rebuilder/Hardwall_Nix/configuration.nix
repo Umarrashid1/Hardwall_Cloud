@@ -11,6 +11,7 @@ let
 in {
   # Import the Raspberry Pi 4 hardware configuration
   imports = [
+    ./remote-builder.nix
     "${fetchTarball "https://github.com/NixOS/nixos-hardware/archive/${nixosHardwareVersion}.tar.gz"}/raspberry-pi/4"
   ];
 

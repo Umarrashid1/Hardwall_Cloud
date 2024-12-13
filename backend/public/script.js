@@ -130,6 +130,14 @@ document.getElementById("allowButton").addEventListener("click", () => {
 document.getElementById("configButton").addEventListener("click", () => {
     window.location.href = "./configpage.html";
 });
+document.getElementById("restartButton").addEventListener("click", () => {
+    if (!piConnected) {
+        console.warn('Cannot send restart command. Pi is not connected.');
+        return;
+    }
+    console.log('Sending restart command via WebSocket');
+    socket.send(JSON.stringify({ action: 'restart' }));
+});
 
 // Utility functions for UI updates
 function updateDeviceStatus(statusText) {

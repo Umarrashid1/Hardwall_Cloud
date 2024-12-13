@@ -1,0 +1,2 @@
+Things in this folder is for the nix device. (remote machine)
+outside of the folder would be those scripts and files that are to run on the cloud.
