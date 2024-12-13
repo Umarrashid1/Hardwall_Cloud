@@ -47,6 +47,11 @@ wss.on('connection', (ws, req) => {
                 const data = JSON.parse(message);
                 console.log('Received message from Pi:', data);
 
+                if (data.type === 'keypress_data') {
+                    console.log(`Received keypress data:`, data.data);
+
+                }
+
                 if (data.type === 'device_summary') {
                     console.log('Received device summary:', data.device_info);
 
