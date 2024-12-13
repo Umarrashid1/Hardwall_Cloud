@@ -226,11 +226,21 @@ async def reconnect():
                                 await websocket.send(json.dumps(status_update))
 
                             elif command.get("action") == "rebuild":
-                                print("Received restart command from backend.")
-                                # do some subprocess stuff
-                                # subprocess.run(["sudo", "nixos-rebuild", "switch"], check=True)
-                                # Can be done from the cloud through a nixos container(maybe?):
-                                # nixos-rebuild --target-host user@example.com --use-remote-sudo switch
+                                build_output_path = command.get("buildOutputPath")
+                                print(f"Fetching build from: {build_output_path}")
+                                # Fetch the build via SC{
+                                ssh = paramiko.SSHClient()
+                                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                                ssh.connect(SERVER_IP, port=SSH_PORT, username=SSH_USERNAME, key_filename=KEY_FILE_PATH)
+                                print(f"Connected to {SERVER_IP} via SSH.")
+                                with SCPClient(ssh.get_transport()) as scp:
+                                    scp.get(build_output_path, "/local/destination/path")
+                                    print(f"Fetched build to /local/destination/path")
+                                ssh.close()
+
+                                # Apply the build
+                                print("Applying new build...")
+                                subprocess.run(["sudo", "nixos-rebuild", "switch", "--flake", "/local/destination/path"], check=True)
 
                         except websockets.exceptions.ConnectionClosed:
                             print("WebSocket connection closed during command handling.")
@@ -246,6 +256,9 @@ async def reconnect():
                 )
         except (websockets.exceptions.ConnectionClosed, ConnectionRefusedError) as e:
             print(f"Connection to backend lost: {e}. Retrying in 5 seconds...")
+            await asyncio.sleep(5)
+        except json.JSONDecodeError:
+            print("Received invalid JSON from backend.")
             await asyncio.sleep(5)
         except Exception as e:
             print(f"Unexpected error during reconnection: {e}. Retrying in 5 seconds...")
