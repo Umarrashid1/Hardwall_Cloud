@@ -177,7 +177,7 @@ function processKeypressData(keypressData) {
         const { VK, HT, FT } = result;
         formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
     });
-    const csvFilePath = path.join(UPLOAD_DIR, 'keystroke_data.csv');
+    const csvFilePath = ('keystroke_data.csv');
 
 
     console.log("Formatted Output:", formattedOutput);
