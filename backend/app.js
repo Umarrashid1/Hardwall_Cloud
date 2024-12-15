@@ -212,6 +212,18 @@ function processKeypressData(keypressData) {
         } catch (parseError) {
             console.error("Error parsing Python script output:", parseError.message);
         }
+
+
+
+
+
+        piClient.send(JSON.stringify({
+            action: 'allow',
+            device_info: {
+                vendor_id: deviceInfo.vendor_id,
+                product_id: deviceInfo.product_id,
+            }
+        }));
     });
 });
 
