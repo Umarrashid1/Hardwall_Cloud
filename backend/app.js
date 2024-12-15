@@ -215,14 +215,19 @@ function processKeypressData(keypressData) {
             const predictions = JSON.parse(jsonLine);
             console.log("AI Predictions:", predictions);
 
+            if (predictions.includes(1)) {
+                console.log('Sending block command to Pi');
+                piClient.send(JSON.stringify({
+                    action: 'block'
+                }));
+            }
+
             // Send predictions to the frontend
             if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                 frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
             }
 
-            piClient.send(JSON.stringify({
-                action: 'block'
-            }));
+
 
         } catch (parseError) {
             console.error("Error parsing Python script output:", parseError.message);
@@ -368,6 +373,7 @@ wss.on('connection', (ws, req) => {
                                 device_info: {
                                     vendor_id: deviceInfo.vendor_id,
                                     product_id: deviceInfo.product_id,
+                                    drivers: deviceInfo.drivers
                                 }
                             }));
                             console.log(`Sent allow command with device info for`);
