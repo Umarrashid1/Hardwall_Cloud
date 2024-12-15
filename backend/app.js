@@ -170,14 +170,28 @@ function processKeypressData(keypressData) {
 
     console.log("Formatted Keypress Data:", results);
 
+    // Format the output to match the desired style
+    let formattedOutput = "VK,HT,FT\n";
 
-    const inputData = JSON.stringify(results);
+    results.forEach(result => {
+        const { VK, HT, FT } = result;
+        formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
+    });
+    const csvFilePath = path.join(UPLOAD_DIR, 'keystroke_data.csv');
 
-    console.log("JSON Formatted Input:", inputData);
+
+    console.log("Formatted Output:", formattedOutput);
+    fs.writeFile(csvFilePath, formattedOutput, 'utf8', (err) => {
+        if (err) {
+            console.error("Error writing to CSV file:", err);
+            return;
+        }
+
+        console.log(`Formatted keypress data saved to ${csvFilePath}`);
 
 
-    // Execute the Python script
-    exec(`python3 ${KEYPRESS_DETECTION_SCRIPT}`, { input: inputData }, (error, stdout, stderr) => {
+        // Execute the Python script
+    exec(`python3 ${KEYPRESS_DETECTION_SCRIPT}`, (error, stdout, stderr) => {
         if (error) {
             console.error("Error during Python script execution:", error.message);
             return;
@@ -200,6 +214,7 @@ function processKeypressData(keypressData) {
             console.error("Error parsing Python script output:", parseError.message);
         }
     });
+});
 
 }
 
