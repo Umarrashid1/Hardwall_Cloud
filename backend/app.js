@@ -203,6 +203,7 @@ function processKeypressData(keypressData) {
 
         // Parse and log the predictions
         try {
+            console.log("Python script output:", stdout); // stdout will contain the print outputs
             const predictions = JSON.parse(stdout);
             console.log("AI Predictions:", predictions);
 
