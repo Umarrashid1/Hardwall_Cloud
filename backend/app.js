@@ -194,11 +194,9 @@ function processKeypressData(keypressData) {
     exec(`python3 ${KEYPRESS_DETECTION_SCRIPT}`, (error, stdout, stderr) => {
         if (error) {
             console.error("Error during Python script execution:", error.message);
-            return;
         }
         if (stderr) {
             console.error("Python script error output:", stderr);
-            return;
         }
 
         // Parse and log the predictions
