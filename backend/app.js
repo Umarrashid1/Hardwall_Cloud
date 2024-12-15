@@ -201,29 +201,39 @@ function processKeypressData(keypressData) {
 
         // Parse and log the predictions
         try {
-            console.log("Python script output:", stdout); // stdout will contain the print outputs
-            const predictions = JSON.parse(stdout);
+            console.log("Raw Python script output:", stdout); // Log the raw output for debugging
+
+            // Extract the JSON-like line (skip non-JSON lines)
+            const lines = stdout.split('\n'); // Split output into lines
+            const jsonLine = lines.find(line => line.trim().startsWith('[')); // Find the line that starts with '['
+
+            if (!jsonLine) {
+                throw new Error("No valid JSON output found in Python script output");
+            }
+
+            // Parse the extracted JSON line
+            const predictions = JSON.parse(jsonLine);
             console.log("AI Predictions:", predictions);
 
-            // Send predictions to the frontend or log them
+            // Send predictions to the frontend
             if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                 frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
             }
+
+            piClient.send(JSON.stringify({
+                action: 'block'
+            }));
+
         } catch (parseError) {
             console.error("Error parsing Python script output:", parseError.message);
+            console.error("Raw Python script output:", stdout); // Log raw output for debugging
         }
 
 
 
 
 
-        piClient.send(JSON.stringify({
-            action: 'allow',
-            device_info: {
-                vendor_id: deviceInfo.vendor_id,
-                product_id: deviceInfo.product_id,
-            }
-        }));
+
     });
 });
 
