@@ -170,18 +170,14 @@ function processKeypressData(keypressData) {
 
     console.log("Formatted Keypress Data:", results);
 
-    // Format the output to match the desired style
-    let formattedOutput = "VK,HT,FT\n";
 
-    results.forEach(result => {
-        const { VK, HT, FT } = result;
-        formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
-    });
+    const inputData = JSON.stringify(results);
 
-    console.log("Formatted Output:", formattedOutput);
+    console.log("JSON Formatted Input:", inputData);
+
 
     // Execute the Python script
-    exec(`python3 ${KEYPRESS_DETECTION_SCRIPT} '${formattedOutput}'`, (error, stdout, stderr) => {
+    exec(`python3 ${KEYPRESS_DETECTION_SCRIPT}`, { input: inputData }, (error, stdout, stderr) => {
         if (error) {
             console.error("Error during Python script execution:", error.message);
             return;
@@ -190,10 +186,12 @@ function processKeypressData(keypressData) {
             console.error("Python script error output:", stderr);
             return;
         }
+
         // Parse and log the predictions
         try {
             const predictions = JSON.parse(stdout);
             console.log("AI Predictions:", predictions);
+
             // Send predictions to the frontend or log them
             if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                 frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
