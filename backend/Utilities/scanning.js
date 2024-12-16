@@ -1,7 +1,6 @@
-import {exec} from "child_process";
-import path from "path";
-import WebSocket from "ws";
-import fs from "fs";
+const { exec } = require("child_process");
+const path = require("path");
+const fs = require("fs");
 
 const FEATURE_EXTRACTION_SCRIPT = "../malware_predict/feature_extraction.py";
 const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
