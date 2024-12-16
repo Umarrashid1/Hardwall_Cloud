@@ -7,7 +7,7 @@ const keypressParser = require('./keypressParser'); // Utility for keypress pars
 let piClient = null;
 let frontendClient = null;
 let deviceInfoCache = null;
-let piStatus = "blocked";
+let piStatus = null;
 
 // Directory where files are uploaded
 const UPLOAD_DIR = "/home/ubuntu/box";
@@ -125,6 +125,7 @@ function handleDeviceSummary(data) {
     // Validate and process the 'drivers' array
     if (data.device_info.drivers && data.device_info.drivers.includes('usb-storage')) {
         console.log('Storage device detected:', data.device_info);
+
         return;
     }
 
@@ -136,7 +137,6 @@ function handleDeviceSummary(data) {
 
 function handleFileList(data, ws) {
     console.log('Received file list from Pi:', data.files);
-
     const allFilesValid = data.files.every((file) => {
         const filePath = path.join(UPLOAD_DIR, path.basename(file.path));
         if (!fs.existsSync(filePath)) {
