@@ -5,8 +5,7 @@ let socket;
 
 // Initialize WebSocket connection and event listeners
 function initializeWebSocket() {
-    // socket = new WebSocket('ws://130.225.37.50:3000');
-    socket = new WebSocket('ws://localhost:4000');
+    socket = new WebSocket('ws://130.225.37.50:3000');
     // Handle successful connection
     socket.addEventListener('open', () => {
         console.log('Connected to WebSocket server');
