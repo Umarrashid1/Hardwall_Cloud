@@ -1,12 +1,3 @@
-const { exec } = require("child_process");
-const path = require("path");
-const fs = require("fs");
-
-const FEATURE_EXTRACTION_SCRIPT = "../malware_predict/feature_extraction.py";
-const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
-const SCANNING_SCRIPT = "../malware_predict/run_scanner.py";
-
-
 function runFeatureExtractionAndScanning() {
     return new Promise((resolve, reject) => {
         // Step 1: Run feature extraction
@@ -27,24 +18,10 @@ function runFeatureExtractionAndScanning() {
                 }
 
                 console.log("Scanning output:", scanStdout);
-
-                // Send scanning results to frontend
-                const resultsFilePath = path.join(UPLOAD_DIR, "scanning_results.json");
-                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                    try {
-                        const results = fs.readFileSync(resultsFilePath, "utf-8");
-                        frontendClient.send(JSON.stringify({ type: "scanningResults", results: JSON.parse(results) }));
-                        console.log("Scanning results sent to frontend.");
-                    } catch (err) {
-                        console.error("Error reading or sending scanning results:", err);
-                    }
-                } else {
-                    console.warn("No frontend connected. Scanning results not sent.");
-                }
-
-                resolve(); // Resolve after sending results
+                resolve(); // Resolve after scanning
             });
         });
     });
 }
-module.exports = {runFeatureExtractionAndScanning};
+
+module.exports = { runFeatureExtractionAndScanning };
