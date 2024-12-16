@@ -8,34 +8,72 @@
 </head>
     <body>
         <div id="sidePanel">
-            <button id="configButton" >Configure Hardwall</button>
+            <button id="configButton" >Configure</button>
             <button id="restartButton" disabled>Restart Device</button>
+            <button id="fullLogsButton">Show full logs</button>
+        </div>
 
-            <div id="container">
-                <header>
-                    <h1>USB Status Monitor</h1>
-                </header>
+        <div id="fullLogsModal" style="display: none;">
+            <div class="modal-content">
+                <h2>Full Logs</h2>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <p>Here are the full logs...</p>
+                <button id="closeModalButton">Close</button>
+            </div>
+        </div>
 
-                <main>
-                    <div id="statusPanel">
-                        <p id="deviceStatusText">Awaiting Pi connection...</p>
-                        <div id="usbStatusContainer">
-                            <p id="usbStatus">USB Status: Unknown</p>
-                        </div>
+
+        <div id="containerLeft">
+            <header>
+                <h1>USB Status Monitor</h1>
+            </header>
+
+            <main>
+                <div id="statusPanel">
+                    <p id="deviceStatusText">Awaiting Pi connection...</p>
+                    <div id="usbStatusContainer">
+                        <p id="usbStatus">USB Status: Unknown</p>
                     </div>
-
-                    <div id="buttonPanel">
-                        <button id="blockButton" disabled>Block USB</button>
-                        <button id="allowButton" disabled>Allow USB</button>
-                    </div>
-                </main>
-
-                <div id="scannerPanel">
-                    <h1> Scanner status </h1>
                 </div>
-                <main>
-                    <p id="scannerOutput">N/A</p>
-                </main>
+
+                <div id="buttonPanel">
+                    <button id="blockButton" disabled>Block USB</button>
+                    <button id="allowButton" disabled>Allow USB</button>
+                </div>
+            </main>
+
+            <div id="scannerPanel">
+                <h1> Scanner status </h1>
+            </div>
+            <main>
+                <p id="scannerOutput">N/A</p>
+            </main>
+        </div>
+        <div id="containerRight">
+            <header>
+                <h1>Device Information</h1>
+            </header>
+            <div id="deviceInfoContainer">
+                <p id="deviceInfo">Awaiting Pi connection...</p>
+                <div id="importantInfoContainer">
+                    <p id="importantInfo1">Important info 1</p>
+                    <p id="importantInfo2">Important info 2</p>
+                    <p id="importantInfo3">Important info 3</p>
+                    <p id="importantInfo4">Important info 4</p>
+                    <p id="importantInfo5">Important info 5</p>
+                </div>
             </div>
         </div>
 
