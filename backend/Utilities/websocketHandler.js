@@ -122,17 +122,16 @@ function handleFrontendConnection(ws) {
 function handleDeviceSummary(data) {
     console.log('Received device summary:', data.device_info);
 
-    deviceInfoCache = data.device_info;
+    // Validate and process the 'drivers' array
+    if (data.device_info.drivers && data.device_info.drivers.includes('usb-storage')) {
+        console.log('Storage device detected:', data.device_info);
+        return;
+    }
 
     notifyFrontend({
         type: 'device_summary',
-        device_info: data.device_info,
-        event_history: data.event_history
+        device_info: data.device_info
     });
-
-    if (!data.device_info.includes('usb-storage')) {
-        console.log('Non-storage device detected. No further processing.');
-    }
 }
 
 function handleFileList(data, ws) {
