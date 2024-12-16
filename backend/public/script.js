@@ -29,6 +29,7 @@ function initializeWebSocket() {
         if (data.piConnected !== undefined) {
             piConnected = data.piConnected;
             usbStatus = data.status
+            console.log("Received device status:", data.status);
             updateUIBasedOnPiStatus();
             updateUSBStatus();
         }
