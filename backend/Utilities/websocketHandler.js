@@ -163,7 +163,7 @@ function handleFrontendConnection_old(ws) {
 
 function handleDeviceSummary(data) {
     console.log('Received device summary:', data.device_info);
-
+    deviceInfoCache = data.device_info;
     if (data.device_info.drivers && data.device_info.drivers.includes('usb-storage')) {
         console.log('Storage device detected:', data.device_info);
 
