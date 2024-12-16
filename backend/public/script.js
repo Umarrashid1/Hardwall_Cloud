@@ -45,11 +45,21 @@ function initializeWebSocket() {
         if (data.type === "device_summary") {
             console.log("Received device summary:", data.device_info);
 
-            // Extract relevant information
+            // Extract relevant device information
             const { vendor_id, product_id, drivers } = data.device_info;
-            showButtonPanel();
-            // Update the UI with extracted information
-            updateDeviceStatus({ vendor_id, product_id, drivers });
+
+            // Create plain-text summary for the modal
+            const logHeading = "Device Summary";
+            const logBody = `
+        Vendor ID: ${vendor_id || "Unknown"}
+        Product ID: ${product_id || "Unknown"}
+        Drivers: ${drivers?.join(", ") || "None"}
+    `;
+
+            // Update the modal with plain text
+            updateLogModalText(logHeading, logBody);
+
+
         }
 
         if (data.type === "deviceInfo") {
@@ -210,12 +220,12 @@ function updateLogModalText(headingText, bodyText) {
     if (modal) {
         const heading = modal.querySelector("h2");
         if (heading) {
-            heading.textContent = headingText;
+            heading.textContent = headingText; // Update heading text
         }
 
         const paragraph = modal.querySelector("p");
         if (paragraph) {
-            paragraph.textContent = bodyText;
+            paragraph.textContent = bodyText; // Update body text
         }
     } else {
         console.error("`fullLogsModal` element not found in the DOM.");
