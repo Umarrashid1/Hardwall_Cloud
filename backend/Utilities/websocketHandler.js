@@ -78,8 +78,22 @@ function handlePiConnection(ws) {
         notifyFrontend({ piConnected: false });
     });
 }
-
 function handleStatus(data, ws) {
+    console.log("Received Pi status:", data);
+    const validStatuses = ["allow", "block"];
+    if (validStatuses.includes(data.data)) {
+        piStatus = data.data; // Update the backend's internal state
+        notifyFrontend({
+            type: "status",
+            piStatus
+        });
+        console.log("Notified frontend of updated status:", piStatus);
+    } else {
+        console.warn("Invalid status received from Pi:", data.data);
+    }
+}
+
+function handleStatus_old(data, ws) {
     console.log("Received Pi status:", data);
     piStatus = data.data; // Directly store the 'data' field (e.g., "Blocked")
 
@@ -89,8 +103,37 @@ function handleStatus(data, ws) {
     });
 }
 
-
 function handleFrontendConnection(ws) {
+    console.log('Frontend client connected');
+    frontendClient = ws;
+
+    // Notify frontend of initial connection and status
+    ws.send(JSON.stringify({
+        type: 'status',
+        piStatus: piStatus || 'block', // Default to 'block' if undefined
+        piConnected: !!piClient
+    }));
+
+    ws.on('message', (message) => {
+        try {
+            const data = JSON.parse(message);
+            console.log('Message received from frontend:', data);
+
+            if (piClient && piClient.readyState === WebSocket.OPEN) {
+                forwardCommandToPi(data);
+            }
+        } catch (error) {
+            console.error('Error parsing frontend message:', error);
+        }
+    });
+
+    ws.on('close', () => {
+        console.log('Frontend client disconnected');
+        frontendClient = null;
+    });
+}
+
+function handleFrontendConnection_old(ws) {
     console.log('Frontend client connected');
     frontendClient = ws;
     notifyFrontend({ piConnected: !!piClient });
@@ -118,15 +161,12 @@ function handleFrontendConnection(ws) {
     });
 }
 
-
 function handleDeviceSummary(data) {
     console.log('Received device summary:', data.device_info);
 
-    // Validate and process the 'drivers' array
     if (data.device_info.drivers && data.device_info.drivers.includes('usb-storage')) {
         console.log('Storage device detected:', data.device_info);
 
-        return;
     }
 
     notifyFrontend({
@@ -134,6 +174,8 @@ function handleDeviceSummary(data) {
         device_info: data.device_info
     });
 }
+
+
 
 function handleFileList(data, ws) {
     console.log('Received file list from Pi:', data.files);
@@ -168,8 +210,36 @@ function notifyFrontend(message) {
     }
 }
 
-
 function forwardCommandToPi(command) {
+    console.log(`Forwarding command to Pi: ${command.action}`);
+    switch (command.action) {
+        case 'allow':
+            if (deviceInfoCache) {
+                piClient.send(
+                    JSON.stringify({
+                        action: 'allow',
+                        device_info: {
+                            vendor_id: deviceInfoCache.vendor_id,
+                            product_id: deviceInfoCache.product_id,
+                            drivers: deviceInfoCache.drivers
+                        }
+                    })
+                );
+            } else {
+                console.error('Device info not found in cache.');
+            }
+            break;
+
+        case 'block':
+            piClient.send(JSON.stringify({ action: 'block' }));
+            break;
+
+        default:
+            console.warn('Unhandled command action:', command.action);
+    }
+}
+
+function forwardCommandToPi_old(command) {
     console.log(`Forwarding command to Pi: ${command.action}`);
     switch (command.action) {
         case 'allow':
