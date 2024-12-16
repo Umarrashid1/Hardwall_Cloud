@@ -42,6 +42,16 @@ function initializeWebSocket() {
             updateUSBStatus();
         }
 
+        if (data.type === "device_summary") {
+            console.log("Received device summary:", data.device_info);
+
+            // Extract relevant information
+            const { vendor_id, product_id, drivers } = data.device_info;
+            showButtonPanel();
+            // Update the UI with extracted information
+            updateDeviceStatus({ vendor_id, product_id, drivers });
+        }
+
         if (data.type === "deviceInfo") {
             console.log("Received device info:", data.lsusb_output);
             console.log('Updating UI with device info:', data.deviceInfo);
@@ -92,11 +102,11 @@ function updateUIBasedOnPiStatus() {
     } else {
         blockButton.disabled = true;
         allowButton.disabled = true;
-        updateDeviceStatus("Awaiting Pi connection...");
+            updateDeviceStatus("Awaiting Pi connection...");
     }
 }
 
-// Update the USB status display
+// Update the USB status display (BLOCKED or ALLOW)
 function updateUSBStatus() {
     console.log("Executing updateUSBStatus...");
     const usbStatusElement = document.getElementById("usbStatus");
