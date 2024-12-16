@@ -6,40 +6,56 @@
     <title>USB Status Monitor</title>
     <link rel="stylesheet" href="style.css">
 </head>
-    <body>
-        <div id="sidePanel">
-            <button id="configButton" >Configure Hardwall</button>
-            <button id="restartButton" disabled>Restart Device</button>
+<body>
+<div id="sidePanel">
+    <button id="configButton">Configure</button>
+    <button id="restartButton" disabled>Restart Device</button>
+    <button id="fullLogsButton">Show full logs</button>
+</div>
 
-            <div id="container">
-                <header>
-                    <h1>USB Status Monitor</h1>
-                </header>
+<div id="fullLogsModal">
+    <div class="modal-content">
+        <h2>Full Logs</h2>
+        <p>Log data will appear here...</p>
+        <button id="closeModalButton">Close</button>
+    </div>
+</div>
 
-                <main>
-                    <div id="statusPanel">
-                        <p id="deviceStatusText">Awaiting Pi connection...</p>
-                        <div id="usbStatusContainer">
-                            <p id="usbStatus">USB Status: Unknown</p>
-                        </div>
-                    </div>
-
-                    <div id="buttonPanel">
-                        <button id="blockButton" disabled>Block USB</button>
-                        <button id="allowButton" disabled>Allow USB</button>
-                    </div>
-                </main>
-
-                <div id="scannerPanel">
-                    <h1> Scanner status </h1>
-                </div>
-                <main>
-                    <p id="scannerOutput">N/A</p>
-                </main>
+<div id="containerLeft">
+    <header>
+        <h1>USB Status Monitor</h1>
+    </header>
+    <main>
+        <div id="statusPanel">
+            <p id="deviceStatusText">Awaiting Pi connection...</p>
+            <div id="usbStatusContainer">
+                <p id="usbStatus">USB Status: Unknown</p>
             </div>
         </div>
+        <div id="buttonPanel">
+            <button id="allowButton" disabled>Allow USB</button>
+            <button id="blockButton" disabled>Block USB</button>
+        </div>
+        <div id="scannerPanel">
+            <h2>Scanner Status</h2>
+            <p id="scannerOutput">N/A</p>
+        </div>
+        <div id="virusTotalPanel">
+            <h2>VirusTotal Status</h2>
+            <p id="virusTotalOutput">N/A</p>
+        </div>
+    </main>
+</div>
 
-        <script src="script.js"></script>
-    </body>
+<div id="containerRight">
+    <header>
+        <h1>Device Information</h1>
+    </header>
+    <div id="deviceInfoContainer">
+        <p id="deviceInfo">Awaiting device summary...</p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
 </html>
-
