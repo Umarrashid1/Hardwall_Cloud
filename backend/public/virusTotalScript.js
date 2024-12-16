@@ -1,4 +1,4 @@
-
+// VirusTotal Backend
 const apiKey = 'be1a57391e9307e961c17d32134b2e81c1f68073cefd5407ba96b6f67e315791'; // TEMP API KEY
 
 require('dotenv').config(); // Load environment variables
@@ -50,10 +50,19 @@ async function scanDirectoryVirusTotal(directoryPath) {
         console.log(`Scanning file: ${filePath}`);
         const stats = await initiateVirusScan(filePath);
         if (stats) {
-            console.log(`Scan results for ${filePath}: Malicious - ${stats.malicious}, Suspicious - ${stats.suspicious}, Undetected - ${stats.undetected}`);
+            // Simulated scan results for the UI
+            const scanResults = {
+                malicious: stats.malicious || 0,
+                suspicious: stats.suspicious || 0,
+                undetected: stats.undetected || 0,
+                detailsUrl: `https://www.virustotal.com/gui/file/${stats.id}`, // Hypothetical URL for extended details
+            };
+
+            await updateVirusTotalResults(path.basename(filePath), scanResults);
         }
     }
 }
+
 
 
 
