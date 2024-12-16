@@ -180,6 +180,8 @@ function handleDeviceSummary(data) {
 
 function handleFileList(data, ws) {
     console.log('Received file list from Pi:', data.files);
+
+    // Validate file existence
     const allFilesValid = data.files.every((file) => {
         const filePath = path.join(UPLOAD_DIR, path.basename(file.path));
         if (!fs.existsSync(filePath)) {
@@ -189,23 +191,49 @@ function handleFileList(data, ws) {
         return true;
     });
 
+    // Notify Pi about the file validation status
     ws.send(
         JSON.stringify({
             action: 'fileReceived',
-            status: allFilesValid ? 'success' : 'failed'
+            status: allFilesValid ? 'success' : 'failed',
         })
     );
 
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
+
+        // Run feature extraction and scanning
         runFeatureExtractionAndScanning()
-            .then(() => console.log('Scanning completed successfully.'))
-            .catch((err) => console.error('Error during scanning:', err));
+            .then(() => {
+                console.log('Scanning completed successfully.');
 
-        // Scanning with VirusTotal
-        scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+                // Send scanning results to frontend if connected
+                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                    const resultsFilePath = path.join(UPLOAD_DIR, 'scanning_results.json');
+                    if (fs.existsSync(resultsFilePath)) {
+                        try {
+                            const results = fs.readFileSync(resultsFilePath, 'utf-8');
+                            frontendClient.send(JSON.stringify({ type: 'scanningResults', results: JSON.parse(results) }));
+                            console.log('Scanning results sent to frontend.');
+                        } catch (err) {
+                            console.error('Error reading or sending scanning results:', err);
+                        }
+                    } else {
+                        console.error('Scanning results file not found.');
+                    }
+                } else {
+                    console.warn('No frontend connected. Scanning results not sent.');
+                }
+            })
+            .catch((err) => {
+                console.error('Error during scanning process:', err);
+            });
+
+        // Run VirusTotal scanning
+        scanDirectoryVirusTotal(UPLOAD_DIR)
+            .then(() => console.log('VirusTotal scanning completed successfully.'))
+            .catch((e) => console.error('Error during VirusTotal scanning:', e));
     }
-
 }
 
 
@@ -213,6 +241,7 @@ function notifyFrontend(message) {
     if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
         frontendClient.send(JSON.stringify(message));
     }
+    virusTotal
 }
 
 function forwardCommandToPi(command) {

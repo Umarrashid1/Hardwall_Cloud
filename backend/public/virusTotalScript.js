@@ -1,6 +1,5 @@
 
 const apiKey = 'be1a57391e9307e961c17d32134b2e81c1f68073cefd5407ba96b6f67e315791'; // TEMP API KEY
-const UPLOAD_DIR = "/home/ubuntu/box"; // Directory for files to be scanned
 
 require('dotenv').config(); // Load environment variables
 const fs = require('fs');
@@ -90,7 +89,6 @@ async function checkAnalysisStatus(analysisId) {
 }
 
 module.exports = {
-    initiateVirusScan,
     scanDirectoryVirusTotal,
     checkAnalysisStatus,
 };
