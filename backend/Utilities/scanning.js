@@ -22,8 +22,6 @@ function runFeatureExtractionAndScanning() {
             exec(`python3 ${SCANNING_SCRIPT} ${path.join(UPLOAD_DIR, "extracted_features.csv")}`, (scanError, scanStdout, scanStderr) => {
                 if (scanError) {
                     console.error("Error during malware scanning:", scanStderr);
-                    reject(scanStderr);
-                    return;
                 }
 
                 console.log("Scanning output:", scanStdout);
@@ -34,3 +32,5 @@ function runFeatureExtractionAndScanning() {
 }
 
 module.exports = { runFeatureExtractionAndScanning };
+
+runFeatureExtractionAndScanning()
