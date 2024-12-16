@@ -37,15 +37,18 @@
             <button id="blockButton" disabled>Block USB</button>
         </div>
         <div id="scannerPanel">
-            <h2>Scanner Status</h2>
+            <h2>Scanner Results</h2>
             <p id="scannerOutput">N/A</p>
         </div>
         <div id="virusTotalPanel">
-            <h2>VirusTotal Status</h2>
+            <h2>VirusTotal Results</h2>
             <p id="virusTotalOutput">N/A</p>
+            <button id="extendResultsButton" disabled>Extend</button>
         </div>
     </main>
 </div>
+
+
 
 <div id="containerRight">
     <header>
@@ -53,9 +56,22 @@
     </header>
     <div id="deviceInfoContainer">
         <p id="deviceInfo">Awaiting device summary...</p>
+        <button id="extendDeviceInfoButton" disabled>Extend</button>
     </div>
 </div>
 
+<div id="deviceInfoModal">
+    <div class="modal-content">
+        <h2>Device Information</h2>
+        <p>Device information will appear here...</p>
+        <button id="closeDeviceModalButton">Close</button>
+    </div>
+</div>
+
+
 <script src="script.js"></script>
+<script src="logsModal.js"></script>
+<script src="deviceInfoModalScript.js"></script>
+
 </body>
 </html>
