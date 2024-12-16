@@ -9,7 +9,6 @@ function initializeWebSocket() {
     // Handle successful connection
     socket.addEventListener('open', () => {
         console.log('Connected to WebSocket server');
-        // Optionally request initial Pi status
         socket.send(JSON.stringify({ action: 'checkPiStatus' }));
     });
 
