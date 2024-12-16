@@ -34,6 +34,8 @@ function initWebSocket(server) {
 }
 
 
+
+
 function handlePiConnection(ws) {
     console.log('Pi connected via WebSocket');
     piClient = ws;
@@ -55,6 +57,10 @@ function handlePiConnection(ws) {
                     handleDeviceSummary(data);
                     break;
 
+                case 'status':
+                    handleStatus(data, ws);
+                    break;
+
                 case 'fileList':
                     handleFileList(data, ws);
                     break;
@@ -71,6 +77,14 @@ function handlePiConnection(ws) {
         console.log('Pi disconnected');
         piClient = null;
         notifyFrontend({ piConnected: false });
+    });
+}
+
+function handleStatus(data, ws) {
+    console.log("Received Pi status:", data)
+    notifyFrontend({
+        type: 'status',
+        Status: data,
     });
 }
 

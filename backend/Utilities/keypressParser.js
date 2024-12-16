@@ -217,11 +217,6 @@ function processKeypressData(keypressData) {
                 console.error("Raw Python script output:", stdout); // Log raw output for debugging
             }
 
-
-
-
-
-
         });
     });
 }
