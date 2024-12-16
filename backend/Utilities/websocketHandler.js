@@ -7,6 +7,7 @@ const keypressParser = require('./keypressParser'); // Utility for keypress pars
 let piClient = null;
 let frontendClient = null;
 let deviceInfoCache = null;
+let piStatus = "blocked";
 
 // Directory where files are uploaded
 const UPLOAD_DIR = "/home/ubuntu/box";
@@ -39,14 +40,12 @@ function initWebSocket(server) {
 function handlePiConnection(ws) {
     console.log('Pi connected via WebSocket');
     piClient = ws;
-
     notifyFrontend({ piConnected: true });
 
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
             console.log('Received message from Pi:', data);
-
             switch (data.type) {
                 case 'keypress_data':
                     console.log('Received keypress data:', data.data);
@@ -82,6 +81,7 @@ function handlePiConnection(ws) {
 
 function handleStatus(data, ws) {
     console.log("Received Pi status:", data)
+    piStatus = data
     notifyFrontend({
         type: 'status',
         Status: data,
@@ -92,7 +92,6 @@ function handleStatus(data, ws) {
 function handleFrontendConnection(ws) {
     console.log('Frontend client connected');
     frontendClient = ws;
-
     notifyFrontend({ piConnected: !!piClient });
 
     ws.on('message', (message) => {
@@ -101,7 +100,9 @@ function handleFrontendConnection(ws) {
             console.log('Message received from frontend:', data);
 
             if (data.action === 'checkPiStatus') {
-                ws.send(JSON.stringify({ piConnected: !!piClient }));
+                ws.send(JSON.stringify({
+                    piConnected: !!piClient,
+                    piStatus: piStatus}));
             } else if (piClient && piClient.readyState === WebSocket.OPEN) {
                 forwardCommandToPi(data);
             }

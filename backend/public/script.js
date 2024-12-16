@@ -30,7 +30,9 @@ function initializeWebSocket() {
         // Update Pi connection status
         if (data.piConnected !== undefined) {
             piConnected = data.piConnected;
+            usbStatus = data.status
             updateUIBasedOnPiStatus();
+            updateUSBStatus();
         }
 
 
