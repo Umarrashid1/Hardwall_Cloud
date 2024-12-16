@@ -6,7 +6,7 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 const { postTestFiles, postFile, postHardwallConfig } = require('./clusterServiceScripts.js');
-const keypressParser = require ('./Utilities/keypressParser')
+const keypressParser = require ('../Utilities/keypressParser')
 const {initWebSocket} = require("./Utilities/websocketHandler");
 
 // Constants for file paths and scripts
