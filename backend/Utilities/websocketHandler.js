@@ -80,11 +80,12 @@ function handlePiConnection(ws) {
 }
 
 function handleStatus(data, ws) {
-    console.log("Received Pi status:", data)
-    piStatus = data
+    console.log("Received Pi status:", data);
+    piStatus = data.data; // Directly store the 'data' field (e.g., "Blocked")
+
     notifyFrontend({
         type: 'status',
-        Status: data,
+        piStatus: piStatus // Send a simplified status response
     });
 }
 

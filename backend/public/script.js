@@ -36,9 +36,9 @@ function initializeWebSocket() {
 
 
 
-        if (data.type === "Status") {
+        if (data.type === "status") { // Ensure lowercase match
             console.log("Received device status:", data);
-            usbStatus = data.status;
+            usbStatus = data.piStatus;
             updateUSBStatus();
         }
 
