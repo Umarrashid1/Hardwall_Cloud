@@ -108,6 +108,14 @@ main {
 
 #buttonPanel button:hover:not(:disabled) {
     background-color: #4a9fd8;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 #importantInfoContainer {
     margin: 10px 0;
@@ -131,12 +139,8 @@ main {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-
-
     max-width: 80%;
     max-height: 70%;
-
-
     overflow-y: auto;
     overflow-x: hidden;
     word-wrap: break-word;
