@@ -2,7 +2,8 @@ const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs');
 const { runFeatureExtractionAndScanning } = require('./scanning'); // Utility functions for scanning
-const keypressParser = require('./keypressParser'); // Utility for keypress parsing
+const keypressParser = require('./keypressParser');
+const {scanDirectoryVirusTotal} = require("../public/virusTotalScript"); // Utility for keypress parsing
 
 let piClient = null;
 let frontendClient = null;
@@ -200,7 +201,11 @@ function handleFileList(data, ws) {
         runFeatureExtractionAndScanning()
             .then(() => console.log('Scanning completed successfully.'))
             .catch((err) => console.error('Error during scanning:', err));
+
+        // Scanning with VirusTotal
+        scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
     }
+
 }
 
 
