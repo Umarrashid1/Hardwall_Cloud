@@ -25,3 +25,10 @@ spec:
                 name: malware-predictor-service
                 port:
                   number: 5000
+          - path: /keystroke-ai
+            pathType: Prefix
+            backend:
+              service:
+                name: keystroke-ai-service
+                port:
+                  number: 5300    
