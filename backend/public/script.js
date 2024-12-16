@@ -2,10 +2,11 @@ let piConnected = false;
 let usbStatus = "Unknown";
 let socket;
 
+
 // Initialize WebSocket connection and event listeners
 function initializeWebSocket() {
-    socket = new WebSocket('ws://130.225.37.50:3000');
-
+    // socket = new WebSocket('ws://130.225.37.50:3000');
+    socket = new WebSocket('ws://localhost:4000');
     // Handle successful connection
     socket.addEventListener('open', () => {
         console.log('Connected to WebSocket server');
@@ -32,9 +33,10 @@ function initializeWebSocket() {
             updateUIBasedOnPiStatus();
         }
 
-        // Handle USB status updates
-        if (data.type !== undefined) {
-            console.log('USB status update received:', data.status);
+
+
+        if (data.type === "Status") {
+            console.log("Received device status:", data);
             usbStatus = data.status;
             updateUSBStatus();
         }
