@@ -203,7 +203,7 @@ function handleFileList(data, ws) {
             .catch((err) => console.error('Error during scanning:', err));
 
         // Scanning with VirusTotal
-        scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+        //scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
     }
 
 }
