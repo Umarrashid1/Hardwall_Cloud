@@ -1,3 +1,12 @@
+const { exec } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+const FEATURE_EXTRACTION_SCRIPT = "../malware_predict/feature_extraction.py";
+const UPLOAD_DIR = "/home/ubuntu/box"; // Directory where files are uploaded
+const SCANNING_SCRIPT = "../malware_predict/run_scanner.py";
+
+
 function runFeatureExtractionAndScanning() {
     return new Promise((resolve, reject) => {
         // Step 1: Run feature extraction
