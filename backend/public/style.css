@@ -90,8 +90,9 @@ main {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-
+}
+#sidePanel button:hover {
+    background-color: #4a9fd8;
 }
 
 #buttonPanel button:disabled {
@@ -106,7 +107,7 @@ main {
     transition: background-color 0.3s ease;
 }
 
-#buttonPanel button:hover:not(:disabled) {
+#buttonPanel button:not(:disabled) {
     background-color: #4a9fd8;
     padding: 10px 20px;
     font-size: 1rem;
@@ -117,6 +118,10 @@ main {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+#buttonPanel button:not(:disabled):hover {
+    background-color: #61dafb;
+}
+
 #importantInfoContainer {
     margin: 10px 0;
     padding: 10px;
@@ -139,8 +144,12 @@ main {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+
+
     max-width: 80%;
     max-height: 70%;
+
+
     overflow-y: auto;
     overflow-x: hidden;
     word-wrap: break-word;
