@@ -13,7 +13,7 @@ const cloudConfigAddress = ingressAddress + '/config-cloud/';
 async function postFile(fileInput) {
     var formData = new FormData();
     fileInput.files.forEach(file => {
-        formData.append('file', file.stream, file.data, file.fileName);
+        formData.append('file', file.stream, file.fileName);
     });
 
     try {
