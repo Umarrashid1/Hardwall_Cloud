@@ -1,15 +1,13 @@
-// VirusTotal Backend
 const apiKey = 'be1a57391e9307e961c17d32134b2e81c1f68073cefd5407ba96b6f67e315791'; // TEMP API KEY
-
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const FormData = require('form-data');
-const fetch = require('node-fetch'); // Use `node-fetch` for HTTP requests
+const fetch = require('node-fetch'); // For HTTP requests
 
-
-async function initiateVirusScan(filePath) {
-    const fileStream = fs.createReadStream(filePath); // Stream the file
+// Upload a file to VirusTotal
+async function uploadFileToVirusTotal(filePath) {
+    const fileStream = fs.createReadStream(filePath);
     const formData = new FormData();
     formData.append('file', fileStream);
 
@@ -18,53 +16,94 @@ async function initiateVirusScan(filePath) {
         method: 'POST',
         headers: {
             'x-apikey': apiKey,
-            ...formData.getHeaders(), // Include form headers
+            ...formData.getHeaders(),
         },
         body: formData,
     };
 
     try {
         const response = await fetch(url, options);
-        if (response.ok) {
-            const data = await response.json();
-            console.log('File uploaded successfully:', data);
-            return data;
-        } else {
-            console.error('Error uploading file:', response.status, response.statusText);
+        if (!response.ok) {
+            console.error('Failed to upload file:', response.status, response.statusText);
             return null;
         }
+
+        const data = await response.json();
+        console.log('File uploaded successfully:', data);
+        return data.data.id; // Return the analysis ID
     } catch (error) {
-        console.error('Network error while uploading file:', error);
+        console.error('Error uploading file:', error);
         return null;
     }
 }
-// Function to scan all files in a directory
+
+// Fetch analysis report
+async function fetchAnalysisResults(analysisId) {
+    const url = `https://www.virustotal.com/api/v3/analyses/${analysisId}`;
+    const options = {
+        method: 'GET',
+        headers: {
+            'x-apikey': apiKey,
+        },
+    };
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            console.error('Failed to fetch analysis:', response.status, response.statusText);
+            return null;
+        }
+
+        const data = await response.json();
+        console.log('Analysis results:', data);
+
+        // Extract meaningful counts
+        const stats = data.data.attributes.stats;
+        return {
+            malicious: stats.malicious || 0,
+            suspicious: stats.suspicious || 0,
+            undetected: stats.undetected || 0,
+        };
+    } catch (error) {
+        console.error('Error fetching analysis results:', error);
+        return null;
+    }
+}
+
+// Function to scan a directory
 async function scanDirectoryVirusTotal(directoryPath, ws) {
     const fileNames = fs.readdirSync(directoryPath).map(file => path.join(directoryPath, file));
 
     for (const filePath of fileNames) {
         console.log(`Scanning file: ${filePath}`);
-        const stats = await initiateVirusScan(filePath);
-        if (stats) {
-            // Simulated scan results for the UI
-            const scanResults = {
-                malicious: stats.malicious || 0,
-                suspicious: stats.suspicious || 0,
-                undetected: stats.undetected || 0,
-                detailsUrl: `https://www.virustotal.com/gui/file/${stats.id}`, // Hypothetical URL for extended details
-            };
-            console.log("filepath", filePath)
-            console.log("scanresult", scanResults)
 
-            ws.send(JSON.stringify({
-                type: 'virusTotalResult',
-                filepath: path.basename(filePath),
-                scanResult: scanResults
-            }));
+        const analysisId = await uploadFileToVirusTotal(filePath);
+        if (analysisId) {
+            console.log('Waiting for VirusTotal to process the file...');
 
+            // Wait briefly for the analysis to complete (VirusTotal might take a few seconds)
+            await new Promise(resolve => setTimeout(resolve, 10000));
+
+            const scanResults = await fetchAnalysisResults(analysisId);
+            if (scanResults) {
+                const result = {
+                    malicious: scanResults.malicious,
+                    suspicious: scanResults.suspicious,
+                    undetected: scanResults.undetected,
+                    detailsUrl: `https://www.virustotal.com/gui/file/${analysisId}`
+                };
+
+                // Send results back to the WebSocket client
+                ws.send(JSON.stringify({
+                    type: 'virusTotalResult',
+                    filePath: path.basename(filePath),
+                    scanResult: result,
+                }));
+            }
         }
     }
 }
+
 module.exports = {
     scanDirectoryVirusTotal
 };
