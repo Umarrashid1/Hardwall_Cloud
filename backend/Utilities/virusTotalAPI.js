@@ -55,7 +55,7 @@ async function fetchAnalysisResults(analysisId) {
         }
 
         const data = await response.json();
-        console.log('Analysis results:', data);
+        console.log("Full API Response:", JSON.stringify(data, null, 2));
 
         // Extract meaningful counts
         const stats = data.data.attributes.stats;

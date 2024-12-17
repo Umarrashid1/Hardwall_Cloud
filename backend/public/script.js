@@ -127,11 +127,25 @@ function updateButtonVisibility() {
 
 function displayDeviceSummary(deviceInfo) {
     const deviceInfoElement = document.getElementById("deviceInfo");
-    deviceInfoElement.textContent = `
-        Vendor ID: ${deviceInfo.vendor_id || "Unknown"}
-        Product ID: ${deviceInfo.product_id || "Unknown"}
-        Drivers: ${deviceInfo.drivers?.join(", ") || "None"}
+
+    // Create a formatted string for the device information
+    const formattedInfo = `
+        <strong>Vendor ID:</strong> ${deviceInfo.vendor_id || "Unknown"}<br>
+        <strong>Product ID:</strong> ${deviceInfo.product_id || "Unknown"}<br>
+        <strong>Vendor:</strong> ${deviceInfo.vendor || "Unknown"}<br>
+        <strong>Model:</strong> ${deviceInfo.model || "Unknown"}<br>
+        <strong>Serial:</strong> ${deviceInfo.serial || "Unknown"}<br>
+        <strong>Driver:</strong> ${deviceInfo.driver || "Unknown"}<br>
+        <strong>Subsystem:</strong> ${deviceInfo.subsystem || "Unknown"}<br>
+        <strong>Bus Number:</strong> ${deviceInfo.busnum || "Unknown"}<br>
+        <strong>Device Number:</strong> ${deviceInfo.devnum || "Unknown"}<br>
+        <strong>Drivers:</strong> ${deviceInfo.drivers?.join(", ") || "None"}
     `;
+
+    // Set the inner HTML of the container
+    deviceInfoElement.innerHTML = formattedInfo;
+
+    // Mark the device info as received
     deviceInfoReceived = true;
     updateButtonVisibility();
 }
