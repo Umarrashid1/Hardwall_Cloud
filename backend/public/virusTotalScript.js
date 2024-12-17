@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const FormData = require('form-data');
 const fetch = require('node-fetch'); // Use `node-fetch` for HTTP requests
-
+const virustotalFrontend = require('virusTotalFrontend')
 
 
 
@@ -58,7 +58,7 @@ async function scanDirectoryVirusTotal(directoryPath) {
                 detailsUrl: `https://www.virustotal.com/gui/file/${stats.id}`, // Hypothetical URL for extended details
             };
 
-            await updateVirusTotalResults(path.basename(filePath), scanResults);
+            await virustotalFrontend.updateVirusTotalResults(path.basename(filePath), scanResults);
         }
     }
 }
