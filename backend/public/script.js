@@ -46,20 +46,25 @@ function initializeWebSocket() {
                     const fileDiv = document.createElement('div');
                     fileDiv.classList.add('file-result');
 
-                    // Properly format results object into a readable string
                     let formattedResults = "";
-                    if (typeof file.results === "object") {
-                        formattedResults = Object.entries(file.results)
-                            .map(([key, value]) => `${key}: ${value}`)
-                            .join(", ");
+
+                    // Check if results is an array and format Prediction and Probability
+                    if (Array.isArray(file.results) && file.results.length > 0) {
+                        formattedResults = file.results.map(result => {
+                            return `
+                    <strong>Prediction:</strong> ${result.Prediction}<br>
+                    <strong>Probability:</strong> ${(result.Probability * 100).toFixed(2)}%
+                `;
+                        }).join("");
                     } else {
-                        formattedResults = file.results || "No Results";
+                        formattedResults = "No Results";
                     }
 
+                    // Add the file name and results to the container
                     fileDiv.innerHTML = `
-                        <strong>File:</strong> ${file.file_name || "Unknown"}<br>
-                        <strong>Results:</strong> ${formattedResults}
-                    `;
+            <strong>File:</strong> ${file.file_name || "Unknown"}<br>
+            ${formattedResults}
+        `;
                     scannerOutput.appendChild(fileDiv);
                 });
             }
