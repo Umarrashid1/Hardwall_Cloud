@@ -204,13 +204,10 @@ function processKeypressData(keypressData) {
                         action: 'block'
                     }));
                 }
-
                 // Send predictions to the frontend
                 if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                     frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
                 }
-
-
 
             } catch (parseError) {
                 console.error("Error parsing Python script output:", parseError.message);
