@@ -41,16 +41,15 @@ async function postFile(fileInput) {
 }
 
 function createFileInput(fileList) {
-    let files = []
+    let files_array = []
     for (const file of fileList) {
         let filePath = file
         let fileName = path.basename(filePath)
         let fileData = fs.readFileSync(file);
         let fileStream = fs.createReadStream(file);
-        files.push({filename: fileName, path: filePath, data: fileData, stream: fileStream})
+        files_array.push({filename: fileName, path: filePath, data: fileData, stream: fileStream})
     }
-
-    return files
+    return {files: files_array}
 }
 
 function postTestFiles() {
