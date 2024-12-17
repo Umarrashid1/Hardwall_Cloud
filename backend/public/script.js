@@ -30,6 +30,8 @@ function initializeWebSocket() {
             if (data.type === "virusTotalResult") {
                 scanResults = data.scanResult
                 filePath = data.filePath
+                console.log(scanResults)
+                console.log(filePath)
                 updateVirusTotalResults(filePath, scanResults)
             }
 
