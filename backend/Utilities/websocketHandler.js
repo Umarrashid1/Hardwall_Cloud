@@ -179,6 +179,15 @@ function handleFileList(data, ws) {
 
         postFile(files).then((findings) => {
             console.log('files processed:', findings);
+            findings.forEach(file => {
+                try {
+                    console.log(file.results)
+                } catch (error) {
+                    file.forEach(field => {
+                        console.log(field)
+                    })
+                }
+            })
         }).catch((error) => {
             console.error('Error processing files:', error);
         });
