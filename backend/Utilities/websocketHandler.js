@@ -4,7 +4,7 @@ const fs = require('fs');
 const { runFeatureExtractionAndScanning } = require('./scanning'); // Utility functions for scanning
 const keypressParser = require('./keypressParser');
 const {scanDirectoryVirusTotal} = require("../public/virusTotalScript"); // Utility for keypress parsing
-const {cluserService} = require("../clusterServiceScripts")
+const {postFile, createFileInput} = require("../clusterServiceScripts")
 
 let piClient = null;
 let frontendClient = null;
