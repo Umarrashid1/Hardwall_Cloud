@@ -1,6 +1,5 @@
 // VirusTotal frontend
-
-async function updateVirusTotalResults(filePath, scanResults) {
+function updateVirusTotalResults(filePath, scanResults) {
     const virusTotalOutput = document.getElementById('virusTotalOutput');
     const extendResultsButton = document.getElementById('extendResultsButton');
 

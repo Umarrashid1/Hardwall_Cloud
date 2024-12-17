@@ -6,8 +6,6 @@ const fs = require('fs');
 const path = require('path');
 const FormData = require('form-data');
 const fetch = require('node-fetch'); // Use `node-fetch` for HTTP requests
-const virustotalFrontend = require('virusTotalFrontend')
-
 
 
 async function initiateVirusScan(filePath) {
@@ -40,10 +38,8 @@ async function initiateVirusScan(filePath) {
         return null;
     }
 }
-
-
 // Function to scan all files in a directory
-async function scanDirectoryVirusTotal(directoryPath) {
+async function scanDirectoryVirusTotal(directoryPath, ws) {
     const fileNames = fs.readdirSync(directoryPath).map(file => path.join(directoryPath, file));
 
     for (const filePath of fileNames) {
@@ -58,14 +54,15 @@ async function scanDirectoryVirusTotal(directoryPath) {
                 detailsUrl: `https://www.virustotal.com/gui/file/${stats.id}`, // Hypothetical URL for extended details
             };
 
-            await virustotalFrontend.updateVirusTotalResults(path.basename(filePath), scanResults);
+            ws.send(JSON.stringify({
+                type: 'virusTotalResult',
+                filepath: path.basename(filePath),
+                scanResult: scanResults
+            }));
+
         }
     }
 }
-
-
-
-
 module.exports = {
     scanDirectoryVirusTotal
 };
