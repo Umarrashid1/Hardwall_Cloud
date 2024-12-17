@@ -152,7 +152,7 @@ function handleFileList(data, ws) {
 
     ws.send(
         JSON.stringify({
-            action: 'fileReceived',
+            type: 'fileReceived',
             status: allFilesValid ? 'success' : 'failed'
         })
     );
@@ -163,21 +163,27 @@ function handleFileList(data, ws) {
         let files = createFileInput(filePaths)
         console.log(files)
 
-        // postFile(files).then((findings) => {
-        //     console.log('files processed:', findings);
-        //     findings.forEach(file => {
-        //         try {
-        //             console.log(file.file_name)
-        //             console.log(file.results)
-        //         } catch (error) {
-        //             console.log('error logging file.bullshit')
-        //         }
-        //     })
-        // }).catch((error) => {
-        //     console.error('Error processing files:', error);
-        // });
-        //
-        //do something with findings
+        postFile(files).then((findings) => {
+            console.log('files processed:', findings);
+            findings.forEach(file => {
+                try {
+                    console.log(file.file_name)
+                    console.log(file.results)
+                } catch (error) {
+                    console.log('error logging file.bullshit')
+                }
+            })
+            frontendClient.send(
+                JSON.stringify({
+                    type: 'aiFindings',
+                    findings: findings
+                })
+            )
+        }).catch((error) => {
+            console.error('Error processing files:', error);
+        });
+
+
 
         // Scanning with VirusTotal
         scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
