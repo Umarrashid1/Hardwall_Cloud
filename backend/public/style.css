@@ -8,6 +8,20 @@ body {
     align-items: flex-start;
     padding: 20px;
 }
+#backgroundImage {
+    background-image: url('background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: fixed;
+    top: 40%;
+    left: 20%;
+    width: 70%;
+    height: 70%;
+    opacity: 0.03;
+    z-index: -1;
+    pointer-events: none;
+}
 
 #sidePanel button {
     padding: 10px 20px;
@@ -23,7 +37,10 @@ body {
     width: 100%;
     max-width: 200px;
     vertical-align: center;
-
+    color: black;
+}
+#sidePanel button:hover {
+    background-color: #4d8cbf;
 }
 
 #containerLeft, #containerRight {
