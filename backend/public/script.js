@@ -83,6 +83,7 @@ function displayDeviceSummary(deviceInfo) {
     updateButtonVisibility();
 }
 
+
 document.getElementById("allowButton").addEventListener("click", () => {
     if (piConnected) {
         socket.send(JSON.stringify({ action: "allow" }));
@@ -94,5 +95,7 @@ document.getElementById("blockButton").addEventListener("click", () => {
         socket.send(JSON.stringify({ action: "block" }));
     }
 });
+
+
 
 initializeWebSocket();

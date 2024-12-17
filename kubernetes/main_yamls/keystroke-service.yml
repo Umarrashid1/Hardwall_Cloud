@@ -1,0 +1,37 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: keystroke-ai-service
+  labels:
+    app: keystroke-ai
+spec:
+  selector:
+    app: keystroke-ai
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keystroke-ai-deployment
+  labels:
+    app: keystroke-ai
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: keystroke-ai
+  template:
+    metadata:
+      labels:
+        app: keystroke-ai
+    spec:
+      containers:
+        - name: keystroke-ai-container
+          image: docker.io/draellemeister/keystroke-ai:latest
+          ports:
+            - containerPort: 5300

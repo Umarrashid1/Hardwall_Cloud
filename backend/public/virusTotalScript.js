@@ -1,4 +1,4 @@
-
+// VirusTotal Backend
 const apiKey = 'be1a57391e9307e961c17d32134b2e81c1f68073cefd5407ba96b6f67e315791'; // TEMP API KEY
 
 require('dotenv').config(); // Load environment variables
@@ -50,45 +50,22 @@ async function scanDirectoryVirusTotal(directoryPath) {
         console.log(`Scanning file: ${filePath}`);
         const stats = await initiateVirusScan(filePath);
         if (stats) {
-            console.log(`Scan results for ${filePath}: Malicious - ${stats.malicious}, Suspicious - ${stats.suspicious}, Undetected - ${stats.undetected}`);
+            // Simulated scan results for the UI
+            const scanResults = {
+                malicious: stats.malicious || 0,
+                suspicious: stats.suspicious || 0,
+                undetected: stats.undetected || 0,
+                detailsUrl: `https://www.virustotal.com/gui/file/${stats.id}`, // Hypothetical URL for extended details
+            };
+
+            await updateVirusTotalResults(path.basename(filePath), scanResults);
         }
     }
 }
 
 
 
-
-// Function to check the analysis status of a file
-async function checkAnalysisStatus(analysisId) {
-    const url = `https://www.virustotal.com/api/v3/analyses/${analysisId}`;
-    const options = {
-        method: 'GET',
-        headers: {
-            'x-apikey': apiKey,
-        },
-    };
-
-    try {
-        const response = await fetch(url, options);
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Analysis status:', data);
-            return data;
-        } else if (response.status === 429) {
-            console.error('Rate limit exceeded. Retrying in 60 seconds...');
-            await new Promise(resolve => setTimeout(resolve, 60000));
-            return await checkAnalysisStatus(analysisId);
-        } else {
-            console.error('Error checking analysis status:', response.status, response.statusText);
-            return null;
-        }
-    } catch (error) {
-        console.error('Network error while checking analysis status:', error);
-        return null;
-    }
-}
 
 module.exports = {
-    scanDirectoryVirusTotal,
-    checkAnalysisStatus,
+    scanDirectoryVirusTotal
 };
