@@ -2,7 +2,7 @@ const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
 const { json } = require('body-parser');
-const path = require("node:path");
+const path = require("path");
 
 // TODO: Update this address to match kube service address
 const ingressAddress = 'http://example.com';
