@@ -29,7 +29,9 @@ function initializeWebSocket() {
             }
 
             if (data.type === 'aiFindings') {
-                findings = data.findings
+                const findings = data.findings;
+
+                // Get the container to display findings
                 const scannerOutput = document.getElementById("scannerOutput");
                 if (!scannerOutput) {
                     console.error("Element with ID 'scannerOutput' not found.");
@@ -43,10 +45,21 @@ function initializeWebSocket() {
                 findings.forEach(file => {
                     const fileDiv = document.createElement('div');
                     fileDiv.classList.add('file-result');
+
+                    // Properly format results object into a readable string
+                    let formattedResults = "";
+                    if (typeof file.results === "object") {
+                        formattedResults = Object.entries(file.results)
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join(", ");
+                    } else {
+                        formattedResults = file.results || "No Results";
+                    }
+
                     fileDiv.innerHTML = `
                         <strong>File:</strong> ${file.file_name || "Unknown"}<br>
-                        <strong>Results:</strong> ${file.results || "No Results"}
-                     `;
+                        <strong>Results:</strong> ${formattedResults}
+                    `;
                     scannerOutput.appendChild(fileDiv);
                 });
             }
