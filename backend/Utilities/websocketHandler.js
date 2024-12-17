@@ -181,11 +181,10 @@ function handleFileList(data, ws) {
             console.log('files processed:', findings);
             findings.forEach(file => {
                 try {
+                    console.log(file.name)
                     console.log(file.results)
                 } catch (error) {
-                    file.forEach(field => {
-                        console.log(field)
-                    })
+                    console.log('error logging file.bullshit')
                 }
             })
         }).catch((error) => {
