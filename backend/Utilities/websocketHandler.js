@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs');
 const keypressParser = require('./keypressParser');
-const {scanDirectoryVirusTotal} = require("../public/virusTotalScript"); // Utility for keypress parsing
+const {scanDirectoryVirusTotal} = require("./virusTotalAPI"); // Utility for keypress parsing
 const {postFile, createFileInput} = require("../clusterServiceScripts")
 
 let piClient = null;
@@ -89,16 +89,6 @@ function handleStatus(data, ws) {
     } else {
         console.warn("Invalid status received from Pi:", data.data);
     }
-}
-
-function handleStatus_old(data, ws) {
-    console.log("Received Pi status:", data);
-    piStatus = data.data; // Directly store the 'data' field (e.g., "Blocked")
-
-    notifyFrontend({
-        type: 'status',
-        piStatus: piStatus // Send a simplified status response
-    });
 }
 
 function handleFrontendConnection(ws) {
@@ -189,9 +179,8 @@ function handleFileList(data, ws) {
         //
         //do something with findings
 
-
         // Scanning with VirusTotal
-        scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+        scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
     }
 
 }
