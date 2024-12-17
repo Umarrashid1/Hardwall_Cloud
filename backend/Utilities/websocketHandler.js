@@ -174,6 +174,8 @@ function handleFileList(data, ws) {
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
         let files = createFileInput(filePaths)
+        console.log(files)
+
         postFile(files).then((findings) => {
             console.log('files processed:', findings);
         }).catch((error) => {
