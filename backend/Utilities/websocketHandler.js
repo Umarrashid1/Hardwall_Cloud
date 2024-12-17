@@ -156,8 +156,8 @@ function handleFileList(data, ws) {
     let filePaths = []
     const allFilesValid = data.files.every((file) => {
         const filePath = path.join(UPLOAD_DIR, path.basename(file.path));
+        filePaths.push(filePath)
         if (!fs.existsSync(filePath)) {
-            filePaths.push(filePath)
             console.error(`File not found: ${filePath}`);
             return false;
         }
@@ -173,6 +173,7 @@ function handleFileList(data, ws) {
 
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
+        console.log(filePaths)
         let files = createFileInput(filePaths)
         console.log(files)
 
