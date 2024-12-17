@@ -53,6 +53,8 @@ async function scanDirectoryVirusTotal(directoryPath, ws) {
                 undetected: stats.undetected || 0,
                 detailsUrl: `https://www.virustotal.com/gui/file/${stats.id}`, // Hypothetical URL for extended details
             };
+            console.log("filepath", filePath)
+            console.log("scanresult", scanResults)
 
             ws.send(JSON.stringify({
                 type: 'virusTotalResult',
