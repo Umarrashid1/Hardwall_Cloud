@@ -126,9 +126,14 @@ function updateButtonVisibility() {
 }
 
 function displayDeviceSummary(deviceInfo) {
+    console.log("Received deviceInfo:", deviceInfo); // Debug output
+
     const deviceInfoElement = document.getElementById("deviceInfo");
 
-    // Create a formatted string for the device information
+    const formattedDrivers = Array.isArray(deviceInfo.drivers)
+        ? deviceInfo.drivers.join(", ")
+        : "None";
+
     const formattedInfo = `
         <strong>Vendor ID:</strong> ${deviceInfo.vendor_id || "Unknown"}<br>
         <strong>Product ID:</strong> ${deviceInfo.product_id || "Unknown"}<br>
@@ -139,15 +144,10 @@ function displayDeviceSummary(deviceInfo) {
         <strong>Subsystem:</strong> ${deviceInfo.subsystem || "Unknown"}<br>
         <strong>Bus Number:</strong> ${deviceInfo.busnum || "Unknown"}<br>
         <strong>Device Number:</strong> ${deviceInfo.devnum || "Unknown"}<br>
-        <strong>Drivers:</strong> ${deviceInfo.drivers?.join(", ") || "None"}
+        <strong>Drivers:</strong> ${formattedDrivers}
     `;
 
-    // Set the inner HTML of the container
     deviceInfoElement.innerHTML = formattedInfo;
-
-    // Mark the device info as received
-    deviceInfoReceived = true;
-    updateButtonVisibility();
 }
 
 
