@@ -2,7 +2,7 @@ let piConnected = false;
 let usbStatus = "Unknown";
 let deviceInfoReceived = false;
 let socket;
-let virusTotalFrontend = require('virusTotalFrontend')
+let virusTotalFrontend = require('./virusTotalFrontend');
 
 function initializeWebSocket() {
     socket = new WebSocket('ws://130.225.37.50:3000');
