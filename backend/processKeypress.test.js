@@ -7,12 +7,17 @@ global.frontendClient = { readyState: WebSocket.OPEN, send: (msg) => console.log
 
 // Example keypress data
 const sampleKeypressData = [
-    { timestamp: "2024-12-17 16:25:24.480", endpoint: "EP81", data: ["0", "4"] },
-    { timestamp: "2024-12-17 16:25:51.327", endpoint: "EP81", data: ["0"] },
-    { timestamp: "2024-12-17 16:25:51.428", endpoint: "EP81", data: ["0", "5"] },
-    { timestamp: "2024-12-17 16:25:52.189", endpoint: "EP81", data: ["0"] },
-    { timestamp: "2024-12-17 16:25:52.268", endpoint: "EP81", data: ["0", "6"] },
-    { timestamp: "2024-12-17 16:25:52.587", endpoint: "EP81", data: ["0"] }
+    { timestamp: '2024-12-16 16:55:52.358', endpoint: 'EP81', data: ['0', '0', '0', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:12.309', endpoint: 'EP81', data: ['0', '0', '20', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:12.319', endpoint: 'EP81', data: ['0', '0', '0', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:13.149', endpoint: 'EP81', data: ['0', '0', '16', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:13.181', endpoint: 'EP81', data: ['0', '0', '16', '7', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:13.234', endpoint: 'EP81', data: ['0', '0', '7', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:15.196', endpoint: 'EP81', data: ['0', '0', '16', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:15.291', endpoint: 'EP81', data: ['0', '0', '0', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:15.424', endpoint: 'EP81', data: ['0', '0', '16', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:15.504', endpoint: 'EP81', data: ['0', '0', '0', '0', '0', '0', '0', '0'] },
+    { timestamp: '2024-12-17 16:25:24.470', endpoint: 'EP81', data: ['0', '0', '1a', '0', '0', '0', '0', '0'] }
 ];
 
 // Call the function directly
