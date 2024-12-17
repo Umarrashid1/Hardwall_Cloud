@@ -35,3 +35,5 @@ async function updateVirusTotalResults(filePath, scanResults) {
     }
 }
 
+module.exports = { updateVirusTotalResults};
+
