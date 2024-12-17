@@ -2,6 +2,7 @@ const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
 const { json } = require('body-parser');
+const path = require("node:path");
 
 // TODO: Update this address to match kube service address
 const ingressAddress = 'http://example.com';
@@ -37,6 +38,19 @@ async function postFile(fileInput) {
         }
         throw error;
     }
+}
+
+function createFileInput(fileList) {
+    let files = []
+    for (const file of fileList) {
+        let filePath = file
+        let fileName = path.basename(filePath)
+        let fileData = fs.readFileSync(file);
+        let fileStream = fs.createReadStream(file);
+        files.push({filename: fileName, path: filePath, data: fileData, stream: fileStream})
+    }
+
+    return files
 }
 
 function postTestFiles() {
