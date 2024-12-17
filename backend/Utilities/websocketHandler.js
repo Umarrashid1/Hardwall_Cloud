@@ -4,6 +4,7 @@ const fs = require('fs');
 const { runFeatureExtractionAndScanning } = require('./scanning'); // Utility functions for scanning
 const keypressParser = require('./keypressParser');
 const {scanDirectoryVirusTotal} = require("../public/virusTotalScript"); // Utility for keypress parsing
+const {cluserService} = require("../clusterServiceScripts")
 
 let piClient = null;
 let frontendClient = null;
@@ -31,11 +32,8 @@ function initWebSocket(server) {
             wss.emit('connection', ws, request);
         });
     });
-
     console.log('WebSocket server initialized.');
 }
-
-
 
 
 function handlePiConnection(ws) {
@@ -134,33 +132,33 @@ function handleFrontendConnection(ws) {
     });
 }
 
-function handleFrontendConnection_old(ws) {
-    console.log('Frontend client connected');
-    frontendClient = ws;
-    notifyFrontend({ piConnected: !!piClient });
 
-    ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message);
-            console.log('Message received from frontend:', data);
 
-            if (data.action === 'checkPiStatus') {
-                ws.send(JSON.stringify({
-                    piConnected: !!piClient,
-                    piStatus: piStatus}));
-            } else if (piClient && piClient.readyState === WebSocket.OPEN) {
-                forwardCommandToPi(data);
-            }
-        } catch (error) {
-            console.error('Error parsing frontend message:', error);
-        }
-    });
 
-    ws.on('close', () => {
-        console.log('Frontend client disconnected');
-        frontendClient = null;
-    });
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function handleDeviceSummary(data) {
     console.log('Received device summary:', data.device_info);
@@ -169,7 +167,6 @@ function handleDeviceSummary(data) {
         console.log('Storage device detected:', data.device_info);
 
     }
-
     notifyFrontend({
         type: 'device_summary',
         device_info: data.device_info
@@ -180,9 +177,11 @@ function handleDeviceSummary(data) {
 
 function handleFileList(data, ws) {
     console.log('Received file list from Pi:', data.files);
+    let filePaths = []
     const allFilesValid = data.files.every((file) => {
         const filePath = path.join(UPLOAD_DIR, path.basename(file.path));
         if (!fs.existsSync(filePath)) {
+            filePaths.push(filePath)
             console.error(`File not found: ${filePath}`);
             return false;
         }
@@ -198,9 +197,15 @@ function handleFileList(data, ws) {
 
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
-        runFeatureExtractionAndScanning()
-            .then(() => console.log('Scanning completed successfully.'))
-            .catch((err) => console.error('Error during scanning:', err));
+        let files = cluserService.createFileInput(filePaths)
+        cluserService.postFile(files).then((findings) => {
+            console.log('Test files processed:', findings);
+        }).catch((error) => {
+            console.error('Error processing test files:', error);
+        });
+
+        //do something with findings
+
 
         // Scanning with VirusTotal
         //scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
@@ -243,34 +248,4 @@ function forwardCommandToPi(command) {
             console.warn('Unhandled command action:', command.action);
     }
 }
-
-function forwardCommandToPi_old(command) {
-    console.log(`Forwarding command to Pi: ${command.action}`);
-    switch (command.action) {
-        case 'allow':
-            if (deviceInfoCache) {
-                piClient.send(
-                    JSON.stringify({
-                        action: 'allow',
-                        device_info: {
-                            vendor_id: deviceInfoCache.vendor_id,
-                            product_id: deviceInfoCache.product_id,
-                            drivers: deviceInfoCache.drivers
-                        }
-                    })
-                );
-            } else {
-                console.error('Device info not found in cache.');
-            }
-            break;
-
-        case 'block':
-            piClient.send(JSON.stringify({ action: 'block' }));
-            break;
-
-        default:
-            console.warn('Unhandled command action:', command.action);
-    }
-}
-
 module.exports = { initWebSocket, piClient, frontendClient };

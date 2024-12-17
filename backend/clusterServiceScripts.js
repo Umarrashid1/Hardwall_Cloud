@@ -121,4 +121,4 @@ function forceRemoteBuild() {
     });
 }
 // Export the functions using CommonJS syntax
-module.exports = { postFile, postTestFiles, postHardwallConfig };
+module.exports = { postFile, postTestFiles, postHardwallConfig, createFileInput };
