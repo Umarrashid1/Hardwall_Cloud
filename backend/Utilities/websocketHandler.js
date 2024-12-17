@@ -1,7 +1,6 @@
 const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs');
-const { runFeatureExtractionAndScanning } = require('./scanning'); // Utility functions for scanning
 const keypressParser = require('./keypressParser');
 const {scanDirectoryVirusTotal} = require("../public/virusTotalScript"); // Utility for keypress parsing
 const {postFile, createFileInput} = require("../clusterServiceScripts")
@@ -131,29 +130,6 @@ function handleFrontendConnection(ws) {
         frontendClient = null;
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
