@@ -197,11 +197,11 @@ function handleFileList(data, ws) {
 
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
-        let files = cluserService.createFileInput(filePaths)
-        cluserService.postFile(files).then((findings) => {
-            console.log('Test files processed:', findings);
+        let files = createFileInput(filePaths)
+        postFile(files).then((findings) => {
+            console.log('files processed:', findings);
         }).catch((error) => {
-            console.error('Error processing test files:', error);
+            console.error('Error processing files:', error);
         });
 
         //do something with findings
