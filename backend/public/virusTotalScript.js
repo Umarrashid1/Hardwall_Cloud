@@ -66,38 +66,6 @@ async function scanDirectoryVirusTotal(directoryPath) {
 
 
 
-
-// Function to check the analysis status of a file
-async function checkAnalysisStatus(analysisId) {
-    const url = `https://www.virustotal.com/api/v3/analyses/${analysisId}`;
-    const options = {
-        method: 'GET',
-        headers: {
-            'x-apikey': apiKey,
-        },
-    };
-
-    try {
-        const response = await fetch(url, options);
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Analysis status:', data);
-            return data;
-        } else if (response.status === 429) {
-            console.error('Rate limit exceeded. Retrying in 60 seconds...');
-            await new Promise(resolve => setTimeout(resolve, 60000));
-            return await checkAnalysisStatus(analysisId);
-        } else {
-            console.error('Error checking analysis status:', response.status, response.statusText);
-            return null;
-        }
-    } catch (error) {
-        console.error('Network error while checking analysis status:', error);
-        return null;
-    }
-}
-
 module.exports = {
-    scanDirectoryVirusTotal,
-    checkAnalysisStatus,
+    scanDirectoryVirusTotal
 };
