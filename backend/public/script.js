@@ -2,7 +2,7 @@ let piConnected = false;
 let usbStatus = "Unknown";
 let deviceInfoReceived = false;
 let socket;
-let virusTotalFrontend = require('./virusTotalFrontend');
+import { updateVirusTotalResults } from './virusTotalFrontend.js';
 
 function initializeWebSocket() {
     socket = new WebSocket('ws://130.225.37.50:3000');
@@ -31,7 +31,7 @@ function initializeWebSocket() {
             if (data.type === "virusTotalResult") {
                 scanResults = data.scanResult
                 filePath = data.filePath
-                virusTotalFrontend.updateVirusTotalResults(filePath, scanResults)
+                updateVirusTotalResults(filePath, scanResults)
             }
 
             if (data.type === "device_summary") {
