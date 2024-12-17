@@ -14,6 +14,7 @@ function initializeWebSocket() {
     socket.addEventListener('message', (event) => {
         let scanResults;
         let filePath;
+        let findings;
         try {
             const data = JSON.parse(event.data);
 
@@ -26,6 +27,30 @@ function initializeWebSocket() {
                 usbStatus = data.piStatus;
                 updateUSBStatus();
             }
+
+            if (data.type === 'aiFindings') {
+                findings = data.findings
+                const scannerOutput = document.getElementById("scannerOutput");
+                if (!scannerOutput) {
+                    console.error("Element with ID 'scannerOutput' not found.");
+                    return;
+                }
+
+                // Clear previous content
+                scannerOutput.innerHTML = "";
+
+                // Iterate over findings and display each file's results
+                findings.forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.classList.add('file-result');
+                    fileDiv.innerHTML = `
+                        <strong>File:</strong> ${file.file_name || "Unknown"}<br>
+                        <strong>Results:</strong> ${file.results || "No Results"}
+                     `;
+                    scannerOutput.appendChild(fileDiv);
+                });
+            }
+
 
             if (data.type === "virusTotalResult") {
                 scanResults = data.scanResult
