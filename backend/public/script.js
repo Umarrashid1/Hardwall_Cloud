@@ -140,7 +140,6 @@ function displayDeviceSummary(deviceInfo) {
         <strong>Vendor:</strong> ${deviceInfo.vendor || "Unknown"}<br>
         <strong>Model:</strong> ${deviceInfo.model || "Unknown"}<br>
         <strong>Serial:</strong> ${deviceInfo.serial || "Unknown"}<br>
-        <strong>Driver:</strong> ${deviceInfo.driver || "Unknown"}<br>
         <strong>Subsystem:</strong> ${deviceInfo.subsystem || "Unknown"}<br>
         <strong>Bus Number:</strong> ${deviceInfo.busnum || "Unknown"}<br>
         <strong>Device Number:</strong> ${deviceInfo.devnum || "Unknown"}<br>
