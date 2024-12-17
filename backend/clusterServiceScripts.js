@@ -62,7 +62,9 @@ function createFileInput(fileList) {
     }
 
     console.log("Returning file input with streams...");
-    return { files: files_array };
+    let bigFiles;
+    bigFiles = {files: files_array};
+    return bigFiles;
 }
 
 function postTestFiles() {
