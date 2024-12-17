@@ -46,10 +46,11 @@ function createFileInput(fileList) {
     for (const file of fileList) {
         let filePath = file
         let fileName = path.basename(filePath)
-        let fileData = fs.readFileSync(file);
+        //let fileData = fs.readFileSync(file);
         let fileStream = fs.createReadStream(file);
-        files_array.push({filename: fileName, path: filePath, data: fileData, stream: fileStream})
+        files_array.push({filename: fileName, path: filePath, stream: fileStream})
     }
+    console.log("returning fileinput")
     return {files: files_array}
 }
 
