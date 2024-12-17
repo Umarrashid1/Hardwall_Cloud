@@ -42,16 +42,27 @@ async function postFile(fileInput) {
 }
 
 function createFileInput(fileList) {
-    let files_array = []
+    let files_array = [];
     for (const file of fileList) {
-        let filePath = file
-        let fileName = path.basename(filePath)
-        //let fileData = fs.readFileSync(file);
-        let fileStream = fs.createReadStream(file);
-        files_array.push({filename: fileName, path: filePath, stream: fileStream})
+        let filePath = file;
+        let fileName = path.basename(filePath);
+
+        // Check if file exists and stream is readable
+        if (!fs.existsSync(filePath)) {
+            console.error(`File does not exist: ${filePath}`);
+            continue;
+        }
+
+        let fileStream = fs.createReadStream(filePath);
+        fileStream.on('error', (err) => {
+            console.error(`Error reading file ${filePath}:`, err.message);
+        });
+
+        files_array.push({ fileName: fileName, path: filePath, stream: fileStream });
     }
-    console.log("returning fileinput")
-    return {files: files_array}
+
+    console.log("Returning file input with streams...");
+    return { files: files_array };
 }
 
 function postTestFiles() {
