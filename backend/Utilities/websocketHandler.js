@@ -132,10 +132,6 @@ function handleFrontendConnection(ws) {
 }
 
 
-
-
-
-
 function handleDeviceSummary(data) {
     console.log('Received device summary:', data.device_info);
     deviceInfoCache = data.device_info;
@@ -177,25 +173,25 @@ function handleFileList(data, ws) {
         let files = createFileInput(filePaths)
         console.log(files)
 
-        postFile(files).then((findings) => {
-            console.log('files processed:', findings);
-            findings.forEach(file => {
-                try {
-                    console.log(file.file_name)
-                    console.log(file.results)
-                } catch (error) {
-                    console.log('error logging file.bullshit')
-                }
-            })
-        }).catch((error) => {
-            console.error('Error processing files:', error);
-        });
-
+        // postFile(files).then((findings) => {
+        //     console.log('files processed:', findings);
+        //     findings.forEach(file => {
+        //         try {
+        //             console.log(file.file_name)
+        //             console.log(file.results)
+        //         } catch (error) {
+        //             console.log('error logging file.bullshit')
+        //         }
+        //     })
+        // }).catch((error) => {
+        //     console.error('Error processing files:', error);
+        // });
+        //
         //do something with findings
 
 
         // Scanning with VirusTotal
-        //scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+        scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
     }
 
 }
