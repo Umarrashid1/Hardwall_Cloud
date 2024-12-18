@@ -79,6 +79,8 @@ function initializeWebSocket() {
             }
 
             if (data.type === "device_summary") {
+                deviceInfoReceived = true; // Add this line
+
                 displayDeviceSummary(data.device_info);
             }
         } catch (error) {
