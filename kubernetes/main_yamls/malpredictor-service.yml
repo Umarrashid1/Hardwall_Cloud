@@ -21,7 +21,7 @@ metadata:
   labels:
     app: malware-predictor
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: malware-predictor
