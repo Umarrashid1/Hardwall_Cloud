@@ -147,22 +147,24 @@ header h1 {
 
 
 .scan-result {
-    border: 1px solid #ddd; /* Light border around the result */
-    border-radius: 8px; /* Rounded corners */
-    padding: 10px; /* Add padding inside the result box */
-    margin-bottom: 10px; /* Space between results */
-    background-color: #f9f9f9; /* Light background color for contrast */
-    font-family: Arial, sans-serif; /* Use a clean, readable font */
-    font-size: 14px; /* Font size for readability */
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #333;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Highlight important information like malicious results */
+
 .scan-result strong {
-    color: #333; /* Make strong text more prominent */
+    color: #61dafb;
+    font-weight: bold;
 }
 
 .scan-result .malicious {
-    color: #d9534f; /* Red color for malicious results */
+    color: #ff4d4d;
     font-weight: bold;
 }

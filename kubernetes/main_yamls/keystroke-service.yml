@@ -10,8 +10,8 @@ spec:
     app: keystroke-ai
   ports:
     - protocol: TCP
-      port: 5000
-      targetPort: 5000
+      port: 5300
+      targetPort: 5300
   type: ClusterIP
 ---
 apiVersion: apps/v1
@@ -21,7 +21,7 @@ metadata:
   labels:
     app: keystroke-ai
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: keystroke-ai

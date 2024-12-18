@@ -13,78 +13,81 @@ function parseKeypressData(keypressData) {
         "7": 68,  // D
         "8": 69,  // E
         "9": 70,  // F
-        "10": 71, // G
-        "11": 72, // H
-        "12": 73, // I
-        "13": 74, // J
-        "14": 75, // K
-        "15": 76, // L
-        "16": 77, // M
-        "17": 78, // N
-        "18": 79, // O
-        "19": 80, // P
-        "20": 81, // Q
-        "21": 82, // R
-        "22": 83, // S
-        "23": 84, // T
-        "24": 85, // U
-        "25": 86, // V
-        "26": 87, // W
-        "27": 88, // X
-        "28": 89, // Y
-        "29": 90, // Z
-
+        "a": 71, // G
+        "b": 72, // H
+        "c": 73, // I
+        "d": 74, // J
+        "e": 75, // K
+        "f": 76, // L
+        "10": 77, // M
+        "11": 78, // N
+        "12": 79, // O
+        "13": 80, // P
+        "14": 81, // Q
+        "15": 82, // R
+        "16": 83, // S
+        "17": 84, // T
+        "18": 85, // U
+        "19": 86, // V
+        "1a": 87, // W
+        "1b": 88, // X
+        "1c": 89, // Y
+        "1d": 90, // Z
         // Numbers
-        "30": 49, // 1
-        "31": 50, // 2
-        "32": 51, // 3
-        "33": 52, // 4
-        "34": 53, // 5
-        "35": 54, // 6
-        "36": 55, // 7
-        "37": 56, // 8
-        "38": 57, // 9
-        "39": 48, // 0
+        "1e": 49, // 1
+        "1f": 50, // 2
+        "20": 51, // 3
+        "21": 52, // 4
+        "22": 53, // 5
+        "23": 54, // 6
+        "24": 55, // 7
+        "25": 56, // 8
+        "26": 57, // 9
+        "27": 48, // 0
 
         // Special Characters
-        "40": 13,  // Enter
-        "41": 27,  // Escape
-        "42": 8,   // Backspace
-        "43": 9,   // Tab
-        "44": 32,  // Space
-        "45": 45,  // -
-        "46": 61,  // =
-        "47": 91,  // [
-        "48": 93,  // ]
-        "49": 92,  // \
-        "50": 59,  // ;
-        "51": 39,  // '
-        "52": 96,  // `
-        "53": 44,  // ,
-        "54": 46,  // .
-        "55": 47,  // /
+        "28": 13,  // Enter
+        "29": 27,  // Escape
+        "2a": 8,   // Backspace
+        "2b": 9,   // Tab
+        "2c": 32,  // Space
+
+        "2d": 45,  // -
+        "2e": 61,  // =
+        "2f": 91,  // [
+        "30": 93,  // ]
+        "31": 92,  // \ |
+
+        "33": 59,  // ; ;
+
+        "34": 39,  // '
+        "35": 96,  // `
+        "36": 44,  // ,
+        "37": 46,  // .
+        "38": 47,  // /
 
         // Function Keys
-        "58": 112, // F1
-        "59": 113, // F2
-        "60": 114, // F3
-        "61": 115, // F4
-        "62": 116, // F5
-        "63": 117, // F6
-        "64": 118, // F7
-        "65": 119, // F8
-        "66": 120, // F9
-        "67": 121, // F10
-        "68": 122, // F11
-        "69": 123, // F12
+        "3a": 112, // F1
+        "3b": 113, // F2
+        "3c": 114, // F3
+        "3d": 115, // F4
+        "3e": 116, // F5
+        "3f": 117, // F6
+        "40": 118, // F7
+        "41": 119, // F8
+        "42": 120, // F9
+        "43": 121, // F10
+        "44": 122, // F11
+        "45": 123, // F12
 
         // Control Keys
-        "224": 17, // Ctrl
-        "225": 16, // Shift
-        "226": 18, // Alt
-        "227": 91, // Left Windows/Command
-        "228": 92, // Right Windows/Command
-        "229": 93  // Menu
+        "e0": 17, // Ctrl Left
+        "e4": 17, // Ctrl Right
+        "e1": 16, // Shift Left
+        "e2": 18, // Alt Left
+        "e6": 18, // Alt Right
+        "e3": 91, // Left Windows
+        "e7": 92, // Left Windows/Command
     };
 
     const results = [];
@@ -98,9 +101,14 @@ function parseKeypressData(keypressData) {
         // Handle key presses
         keys.forEach((key) => {
             if (key !== '0' && !heldKeys[key]) {
-                const flightTime = lastReleaseTime !== null ? timestamp - lastReleaseTime : -1;
+                let flightTime = lastReleaseTime !== null ? timestamp - lastReleaseTime : -1;
                 heldKeys[key] = timestamp; // Record press timestamp
 
+                if (flightTime > 1500) {
+                    flightTime = -1
+                }
+
+                heldKeys[key] = timestamp
                 results.push({
                     VK: HID_KEYCODES[key] || `Unknown(${key})`,
                     HT: null, // HT will be calculated when the key is released
@@ -129,23 +137,25 @@ function parseKeypressData(keypressData) {
         });
     });
 
-    // Assign HT=-1 for any unclosed keys
+    // Assign HT = -1 for any unclosed keys
     Object.keys(heldKeys).forEach((key) => {
         const pressTime = heldKeys[key];
+        const flightTime = lastReleaseTime !== null ? pressTime - lastReleaseTime : -1;
+        const adjustedFlightTime = flightTime > 1500 ? -1 : flightTime;
+
         const result = results.find(
             (r) => r.VK === (HID_KEYCODES[key] || `Unknown(${key})`) && r.HT === null
         );
         if (result) {
             result.HT = -1; // Mark as unclosed
-            result.FT = lastReleaseTime !== null ? pressTime - lastReleaseTime : -1;
+            result.FT = adjustedFlightTime;
         }
     });
 
-    // Sort results by release time for consistent output
-    results.sort((a, b) => (a.HT === -1 ? Infinity : a.HT) - (b.HT === -1 ? Infinity : b.HT));
-
     console.log("Processed Results:", results);
     return results;
+
+
 }
 
 function processKeypressData(keypressData) {
@@ -204,13 +214,10 @@ function processKeypressData(keypressData) {
                         action: 'block'
                     }));
                 }
-
                 // Send predictions to the frontend
                 if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                     frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
                 }
-
-
 
             } catch (parseError) {
                 console.error("Error parsing Python script output:", parseError.message);

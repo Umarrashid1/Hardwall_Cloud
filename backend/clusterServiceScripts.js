@@ -2,17 +2,21 @@ const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
 const { json } = require('body-parser');
+const path = require("path");
+const { parseKeypressData } = require('./Utilities/keypressParser');
 
 // TODO: Update this address to match kube service address
 const ingressAddress = 'http://example.com';
 const featureExtractorAddress = ingressAddress + '/malpredict/';
 const hardwallConfigAddress = ingressAddress + '/config-hardwall/';
 const cloudConfigAddress = ingressAddress + '/config-cloud/';
+const keystrokeAnalyzerAddress = ingressAddress + '/keystroke-ai/';
 
 async function postFile(fileInput) {
     var formData = new FormData();
     fileInput.files.forEach(file => {
-        formData.append('file', file.stream, file.data, file.fileName);
+        console.log(`Appending file: ${file.fileName}, Stream readable: ${file.stream.readable}`);
+        formData.append('file', file.stream, file.fileName);
     });
 
     try {
@@ -37,6 +41,32 @@ async function postFile(fileInput) {
         }
         throw error;
     }
+}
+
+function createFileInput(fileList) {
+    let files_array = [];
+    for (const file of fileList) {
+        let filePath = file;
+        let fileName = path.basename(filePath);
+
+        // Check if file exists and stream is readable
+        if (!fs.existsSync(filePath)) {
+            console.error(`File does not exist: ${filePath}`);
+            continue;
+        }
+
+        let fileStream = fs.createReadStream(filePath);
+        fileStream.on('error', (err) => {
+            console.error(`Error reading file ${filePath}:`, err.message);
+        });
+
+        files_array.push({ fileName: fileName, path: filePath, stream: fileStream });
+    }
+
+    console.log("Returning file input with streams...");
+    let bigFiles;
+    bigFiles = {files: files_array};
+    return bigFiles;
 }
 
 function postTestFiles() {
@@ -87,6 +117,36 @@ function postTestFiles() {
     });
 }
 
+async function postKeystrokes(parsedKeypressData) {
+    // Format the output to match the desired style
+    const formattedData = parsedKeypressData.map(result => ({
+        VK: result.VK,
+        HT: result.HT || -1,
+        FT: result.FT || -1
+    }));
+    
+    try {
+        const response = await axios.post(keystrokeAnalyzerAddress, formattedData, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            console.error('Response status:', error.response.status);
+            console.error('Response headers:', error.response.headers);
+        } else if (error.request) {
+            console.error('Request data:', error.request);
+        } else {
+            console.error('Error message:', error.message);
+        }
+        throw error;
+    }
+}
+
+
 function postHardwallConfig(config) {
     return 'Feature not implemented';
     return new Promise(async (resolve, reject) => {
@@ -121,4 +181,4 @@ function forceRemoteBuild() {
     });
 }
 // Export the functions using CommonJS syntax
-module.exports = { postFile, postTestFiles, postHardwallConfig };
+module.exports = { postFile, postTestFiles, postHardwallConfig, createFileInput, postKeystrokes };

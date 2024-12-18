@@ -9,12 +9,6 @@ const { postTestFiles, postFile, postHardwallConfig } = require('./clusterServic
 const keypressParser = require ('./Utilities/keypressParser')
 const {initWebSocket} = require("./Utilities/websocketHandler");
 
-// Constants for file paths and scripts
-
-
-// Global cache for storing device info
-let deviceInfoCache = null
-
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -47,9 +41,6 @@ function parseDeviceInfo(deviceInfoString) {
         return null;
     }
 }
-
-// Function to run feature extraction and scanning
-
 
 app.post('/config-hardwall', async (req, res) => {
     const config = req.body;

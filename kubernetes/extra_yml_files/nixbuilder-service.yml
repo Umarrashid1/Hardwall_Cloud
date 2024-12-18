@@ -13,6 +13,16 @@ spec:
 
 ---
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nix-builder-ssh-keys
+data:
+  authorized_keys: |
+    ssh-rsa AAAAB3... example@example.com
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,9 +37,17 @@ spec:
       labels:
         app: nix-builder
     spec:
+      initContainers:
+      - name: fix-ssh-permissions
+        image: busybox
+        command: ["sh", "-c", "chmod 600 /root/.ssh/authorized_keys"]
+        volumeMounts:
+        - name: ssh-keys
+          mountPath: /root/.ssh/authorized_keys
+          subPath: authorized_keys
       containers:
       - name: nix-builder
-        image: nixos/nix:latest
+        image: myregistry/nix-builder:latest
         ports:
         - containerPort: 22 # Expose SSH
         volumeMounts:
@@ -38,14 +56,10 @@ spec:
         - mountPath: /root/.ssh/authorized_keys
           subPath: authorized_keys
           name: ssh-keys
+        command: ["/bin/sh", "-c", "service sshd start && tail -f /dev/null"]
       volumes:
       - name: nix-store
         emptyDir: {}
       - name: ssh-keys
         configMap:
           name: nix-builder-ssh-keys
-      
-
----
-
-
