@@ -147,8 +147,9 @@ function displayDeviceSummary(deviceInfo) {
         <strong>Device Number:</strong> ${deviceInfo.devnum || "Unknown"}<br>
         <strong>Drivers:</strong> ${formattedDrivers}
     `;
-
     deviceInfoElement.innerHTML = formattedInfo;
+
+    updateButtonVisibility()
 }
 
 
