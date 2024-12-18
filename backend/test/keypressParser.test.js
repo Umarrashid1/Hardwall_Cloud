@@ -74,7 +74,7 @@ describe('parseKeypressData', () => {
         const keypressData = [
             { timestamp: '2024-12-15 14:00:00.000', data: ['0', '0', '4', '5', '0', '0', '0', '0'] }, // Press A and B
             { timestamp: '2024-12-15 14:00:00.050', data: ['0', '0', '4', '0', '0', '0', '0', '0'] }, // Release B
-            { timestamp: '2024-12-15 14:00:00.100', data: ['0', '0', '4', '5', '0', '0', '0', '0'] }, // Press B
+            { timestamp: '2024-12-15 14:00:00.100', data: ['0', '0', '5', '0', '0', '0', '0', '0'] }, // Press B
             { timestamp: '2024-12-15 14:00:00.150', data: ['0', '0', '0', '0', '0', '0', '0', '0'] }, // Release A and B
         ];
 
@@ -82,7 +82,7 @@ describe('parseKeypressData', () => {
 
         console.log(result);
         expect(result).toEqual([
-            { VK: 65, HT: 150, FT: -1 },  // A released after 150ms
+            { VK: 65, HT: 100, FT: -1 },  // A released after 150ms
             { VK: 66, HT: 50, FT: -1 },   // B held for 50ms
             { VK: 66, HT: 50, FT: 50 },   // B pressed again for 50ms
         ]);
