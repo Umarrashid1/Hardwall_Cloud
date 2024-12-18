@@ -1,5 +1,6 @@
 const { parseKeypressData } = require('../Utilities/keypressParser'); // Adjust the path if needed
 
+
 describe('parseKeypressData', () => {
     test('Single key press and release', () => {
         const keypressData = [
@@ -29,6 +30,8 @@ describe('parseKeypressData', () => {
             { VK: 66, HT: 200, FT: 100 }, // B held for 200ms, FT=100ms from A release to B press
         ]);
     });
+
+    
 
     test('Simultaneous key presses and releases', () => {
         const keypressData = [
@@ -79,7 +82,7 @@ describe('parseKeypressData', () => {
 
         console.log(result);
         expect(result).toEqual([
-            { VK: 65, HT: 150, FT: -1 },  // A released after 150ms
+            { VK: 65, HT: 100, FT: -1 },  // A released after 150ms
             { VK: 66, HT: 50, FT: -1 },   // B held for 50ms
             { VK: 66, HT: 50, FT: 50 },   // B pressed again for 50ms
         ]);

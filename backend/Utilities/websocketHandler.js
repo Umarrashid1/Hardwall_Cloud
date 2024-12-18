@@ -1,9 +1,9 @@
 const WebSocket = require('ws');
 const path = require('path');
 const fs = require('fs');
-const { runFeatureExtractionAndScanning } = require('./scanning'); // Utility functions for scanning
 const keypressParser = require('./keypressParser');
-const {scanDirectoryVirusTotal} = require("../public/virusTotalScript"); // Utility for keypress parsing
+const {scanDirectoryVirusTotal} = require("./virusTotalAPI"); // Utility for keypress parsing
+const {postFile, createFileInput} = require("../clusterServiceScripts")
 
 let piClient = null;
 let frontendClient = null;
@@ -31,11 +31,8 @@ function initWebSocket(server) {
             wss.emit('connection', ws, request);
         });
     });
-
     console.log('WebSocket server initialized.');
 }
-
-
 
 
 function handlePiConnection(ws) {
@@ -94,16 +91,6 @@ function handleStatus(data, ws) {
     }
 }
 
-function handleStatus_old(data, ws) {
-    console.log("Received Pi status:", data);
-    piStatus = data.data; // Directly store the 'data' field (e.g., "Blocked")
-
-    notifyFrontend({
-        type: 'status',
-        piStatus: piStatus // Send a simplified status response
-    });
-}
-
 function handleFrontendConnection(ws) {
     console.log('Frontend client connected');
     frontendClient = ws;
@@ -134,33 +121,6 @@ function handleFrontendConnection(ws) {
     });
 }
 
-function handleFrontendConnection_old(ws) {
-    console.log('Frontend client connected');
-    frontendClient = ws;
-    notifyFrontend({ piConnected: !!piClient });
-
-    ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message);
-            console.log('Message received from frontend:', data);
-
-            if (data.action === 'checkPiStatus') {
-                ws.send(JSON.stringify({
-                    piConnected: !!piClient,
-                    piStatus: piStatus}));
-            } else if (piClient && piClient.readyState === WebSocket.OPEN) {
-                forwardCommandToPi(data);
-            }
-        } catch (error) {
-            console.error('Error parsing frontend message:', error);
-        }
-    });
-
-    ws.on('close', () => {
-        console.log('Frontend client disconnected');
-        frontendClient = null;
-    });
-}
 
 function handleDeviceSummary(data) {
     console.log('Received device summary:', data.device_info);
@@ -169,7 +129,6 @@ function handleDeviceSummary(data) {
         console.log('Storage device detected:', data.device_info);
 
     }
-
     notifyFrontend({
         type: 'device_summary',
         device_info: data.device_info
@@ -180,8 +139,10 @@ function handleDeviceSummary(data) {
 
 function handleFileList(data, ws) {
     console.log('Received file list from Pi:', data.files);
+    let filePaths = []
     const allFilesValid = data.files.every((file) => {
         const filePath = path.join(UPLOAD_DIR, path.basename(file.path));
+        filePaths.push(filePath)
         if (!fs.existsSync(filePath)) {
             console.error(`File not found: ${filePath}`);
             return false;
@@ -191,19 +152,41 @@ function handleFileList(data, ws) {
 
     ws.send(
         JSON.stringify({
-            action: 'fileReceived',
+            type: 'fileReceived',
             status: allFilesValid ? 'success' : 'failed'
         })
     );
 
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
-        runFeatureExtractionAndScanning()
-            .then(() => console.log('Scanning completed successfully.'))
-            .catch((err) => console.error('Error during scanning:', err));
+        console.log(filePaths)
+        let files = createFileInput(filePaths)
+        console.log(files)
+
+        postFile(files).then((findings) => {
+            console.log('files processed:', findings);
+            findings.forEach(file => {
+                try {
+                    console.log(file.file_name)
+                    console.log(file.results)
+                } catch (error) {
+                    console.log('error logging file.bullshit')
+                }
+            })
+            frontendClient.send(
+                JSON.stringify({
+                    type: 'aiFindings',
+                    findings: findings
+                })
+            )
+        }).catch((error) => {
+            console.error('Error processing files:', error);
+        });
+
+
 
         // Scanning with VirusTotal
-        //scanDirectoryVirusTotal('/home/ubuntu/box').then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+        scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
     }
 
 }
@@ -243,34 +226,4 @@ function forwardCommandToPi(command) {
             console.warn('Unhandled command action:', command.action);
     }
 }
-
-function forwardCommandToPi_old(command) {
-    console.log(`Forwarding command to Pi: ${command.action}`);
-    switch (command.action) {
-        case 'allow':
-            if (deviceInfoCache) {
-                piClient.send(
-                    JSON.stringify({
-                        action: 'allow',
-                        device_info: {
-                            vendor_id: deviceInfoCache.vendor_id,
-                            product_id: deviceInfoCache.product_id,
-                            drivers: deviceInfoCache.drivers
-                        }
-                    })
-                );
-            } else {
-                console.error('Device info not found in cache.');
-            }
-            break;
-
-        case 'block':
-            piClient.send(JSON.stringify({ action: 'block' }));
-            break;
-
-        default:
-            console.warn('Unhandled command action:', command.action);
-    }
-}
-
 module.exports = { initWebSocket, piClient, frontendClient };
