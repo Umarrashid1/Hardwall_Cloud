@@ -13,12 +13,12 @@ function parseKeypressData(keypressData) {
         "7": 68,  // D
         "8": 69,  // E
         "9": 70,  // F
-        "0A": 71, // G
-        "0B": 72, // H
-        "0C": 73, // I
-        "0D": 74, // J
-        "0E": 75, // K
-        "0F": 76, // L
+        "a": 71, // G
+        "b": 72, // H
+        "c": 73, // I
+        "d": 74, // J
+        "e": 75, // K
+        "f": 76, // L
         "10": 77, // M
         "11": 78, // N
         "12": 79, // O
@@ -29,13 +29,13 @@ function parseKeypressData(keypressData) {
         "17": 84, // T
         "18": 85, // U
         "19": 86, // V
-        "1A": 87, // W
-        "1B": 88, // X
-        "1C": 89, // Y
-        "1D": 90, // Z
+        "1a": 87, // W
+        "1b": 88, // X
+        "1c": 89, // Y
+        "1d": 90, // Z
         // Numbers
-        "1E": 49, // 1
-        "1F": 50, // 2
+        "1e": 49, // 1
+        "1f": 50, // 2
         "20": 51, // 3
         "21": 52, // 4
         "22": 53, // 5
@@ -52,9 +52,9 @@ function parseKeypressData(keypressData) {
         "2b": 9,   // Tab
         "2c": 32,  // Space
 
-        "2D": 45,  // -
-        "2E": 61,  // =
-        "2F": 91,  // [
+        "2d": 45,  // -
+        "2e": 61,  // =
+        "2f": 91,  // [
         "30": 93,  // ]
         "31": 92,  // \ |
 
@@ -67,12 +67,12 @@ function parseKeypressData(keypressData) {
         "38": 47,  // /
 
         // Function Keys
-        "3A": 112, // F1
-        "3B": 113, // F2
-        "3C": 114, // F3
-        "3D": 115, // F4
-        "3E": 116, // F5
-        "3F": 117, // F6
+        "3a": 112, // F1
+        "3b": 113, // F2
+        "3c": 114, // F3
+        "3d": 115, // F4
+        "3e": 116, // F5
+        "3f": 117, // F6
         "40": 118, // F7
         "41": 119, // F8
         "42": 120, // F9
@@ -81,13 +81,13 @@ function parseKeypressData(keypressData) {
         "45": 123, // F12
 
         // Control Keys
-        "E0": 17, // Ctrl Left
-        "E4": 17, // Ctrl Right
-        "E1": 16, // Shift Left
-        "E2": 18, // Alt Left
-        "E6": 18, // Alt Right
-        "E3": 91, // Left Windows
-        "E7": 92, // Left Windows/Command
+        "e0": 17, // Ctrl Left
+        "e4": 17, // Ctrl Right
+        "e1": 16, // Shift Left
+        "e2": 18, // Alt Left
+        "e6": 18, // Alt Right
+        "e3": 91, // Left Windows
+        "e7": 92, // Left Windows/Command
     };
 
     const results = [];
