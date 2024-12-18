@@ -52,9 +52,9 @@ function parseKeypressData(keypressData) {
         "2b": 9,   // Tab
         "2c": 32,  // Space
 
-        "2D": 45,  // -
-        "2E": 61,  // =
-        "2F": 91,  // [
+        "2d": 45,  // -
+        "2e": 61,  // =
+        "2f": 91,  // [
         "30": 93,  // ]
         "31": 92,  // \ |
 
@@ -67,12 +67,12 @@ function parseKeypressData(keypressData) {
         "38": 47,  // /
 
         // Function Keys
-        "3A": 112, // F1
-        "3B": 113, // F2
-        "3C": 114, // F3
-        "3D": 115, // F4
-        "3E": 116, // F5
-        "3F": 117, // F6
+        "3a": 112, // F1
+        "3b": 113, // F2
+        "3c": 114, // F3
+        "3d": 115, // F4
+        "3e": 116, // F5
+        "3f": 117, // F6
         "40": 118, // F7
         "41": 119, // F8
         "42": 120, // F9
@@ -81,13 +81,13 @@ function parseKeypressData(keypressData) {
         "45": 123, // F12
 
         // Control Keys
-        "E0": 17, // Ctrl Left
-        "E4": 17, // Ctrl Right
-        "E1": 16, // Shift Left
-        "E2": 18, // Alt Left
-        "E6": 18, // Alt Right
-        "E3": 91, // Left Windows
-        "E7": 92, // Left Windows/Command
+        "e0": 17, // Ctrl Left
+        "e4": 17, // Ctrl Right
+        "e1": 16, // Shift Left
+        "e2": 18, // Alt Left
+        "e6": 18, // Alt Right
+        "e3": 91, // Left Windows
+        "e7": 92, // Left Windows/Command
     };
 
     const results = [];
