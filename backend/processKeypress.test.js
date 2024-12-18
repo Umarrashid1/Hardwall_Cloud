@@ -1,4 +1,4 @@
-const { processKeypressData } = require("./Utilities/keypressParser"); // Adjust the path to your module
+const { parseKeypressData } = require("./Utilities/keypressParser"); // Adjust the path to your module
 const WebSocket = require("ws");
 const { postKeystrokes } = require("./clusterServiceScripts");
 // Mock WebSocket clients
@@ -22,12 +22,18 @@ const sampleKeypressData = [
 // Call the function directly
 console.log("Starting processKeypressData Test...");
 
-const parsedKeypressData = processKeypressData(sampleKeypressData);
-postKeystrokes(parsedKeypressData).then((response) => {
-    console.log(response);
-    if (response.predictions) {
-        console.log('Predictions:', response.predictions);
-    }
-}).catch((error) => {
-    console.error('Error posting keystrokes:', error);
-});
+const parsedKeypressData = parseKeypressData(sampleKeypressData);
+console.log("Parsed Keypress Data:", parsedKeypressData);
+
+if (parsedKeypressData) {
+    postKeystrokes(parsedKeypressData).then((response) => {
+        console.log(response);
+        if (response.predictions) {
+            console.log('Predictions:', response.predictions);
+        }
+    }).catch((error) => {
+        console.error('Error posting keystrokes:', error);
+    });
+} else {
+    console.error("Error parsing keypress data");
+}
