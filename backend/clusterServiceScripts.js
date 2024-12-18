@@ -119,15 +119,14 @@ function postTestFiles() {
 
 async function postKeystrokes(parsedKeypressData) {
     // Format the output to match the desired style
-    let formattedData = "VK,HT,FT\n";
-
-    parsedKeypressData.forEach(result => {
-        const { VK, HT, FT } = result;
-        formattedData += `${VK},${HT || -1},${FT || -1}\n`;
-    });
+    const formattedData = parsedKeypressData.map(result => ({
+        VK: result.VK,
+        HT: result.HT || -1,
+        FT: result.FT || -1
+    }));
 
     try {
-        const response = await axios.post(ingressAddress + '/keystroke-data/', formattedData, {
+        const response = await axios.post(keystrokeAnalyzerAddress, formattedData, {
             headers: {
                 'Content-Type': 'application/json'
             }
