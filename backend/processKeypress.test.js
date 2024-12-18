@@ -1,6 +1,6 @@
 const { processKeypressData } = require("./Utilities/keypressParser"); // Adjust the path to your module
 const WebSocket = require("ws");
-
+const { postKeystrokes } = require("./clusterServiceScripts");
 // Mock WebSocket clients
 global.piClient = { send: (msg) => console.log("Mock Pi Send:", msg) };
 global.frontendClient = { readyState: WebSocket.OPEN, send: (msg) => console.log("Frontend Send:", msg) };
@@ -22,4 +22,12 @@ const sampleKeypressData = [
 // Call the function directly
 console.log("Starting processKeypressData Test...");
 
-processKeypressData(sampleKeypressData);
+const parsedKeypressData = processKeypressData(sampleKeypressData);
+postKeystrokes(parsedKeypressData).then((response) => {
+    console.log(response);
+    if (response.predictions) {
+        console.log('Predictions:', response.predictions);
+    }
+}).catch((error) => {
+    console.error('Error posting keystrokes:', error);
+});
