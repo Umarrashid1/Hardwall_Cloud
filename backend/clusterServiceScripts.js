@@ -10,7 +10,7 @@ const ingressAddress = 'http://example.com';
 const featureExtractorAddress = ingressAddress + '/malpredict/';
 const hardwallConfigAddress = ingressAddress + '/config-hardwall/';
 const cloudConfigAddress = ingressAddress + '/config-cloud/';
-const keystrokeAnalyzerAddress = ingressAddress + '/keystroke-data/';
+const keystrokeAnalyzerAddress = ingressAddress + '/keystroke-ai/';
 
 async function postFile(fileInput) {
     var formData = new FormData();
