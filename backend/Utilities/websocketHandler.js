@@ -187,6 +187,8 @@ function handleFileList(data, ws) {
 
         // Scanning with VirusTotal
         scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+        // Empty upload dir
+        emptyBox()
     }
 
 }
@@ -226,4 +228,27 @@ function forwardCommandToPi(command) {
             console.warn('Unhandled command action:', command.action);
     }
 }
+function emptyBox() {
+    try {
+        fs.readdir(UPLOAD_DIR, (err, files) => {
+            if (err) {
+                console.error(`Failed to read files in ${UPLOAD_DIR}:`, err);
+                return;
+            }
+            files.forEach((file) => {
+                const filePath = path.join(UPLOAD_DIR, file);
+                fs.unlink(filePath, (err) => {
+                    if (err) {
+                        console.error(`Failed to delete file ${filePath}:`, err);
+                    } else {
+                        console.log(`Deleted file: ${filePath}`);
+                    }
+                });
+            });
+        });
+    } catch (error) {
+        console.error('Error emptying the box folder:', error);
+    }
+}
+
 module.exports = { initWebSocket, piClient, frontendClient };
