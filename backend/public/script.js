@@ -80,7 +80,6 @@ function initializeWebSocket() {
 
             if (data.type === "device_summary") {
                 deviceInfoReceived = true; // Add this line
-
                 displayDeviceSummary(data.device_info);
             }
         } catch (error) {
@@ -106,6 +105,7 @@ function updateUIBasedOnPiStatus() {
 }
 
 function updateUSBStatus() {
+    console.log(`Current usbStatus: ${usbStatus}`);
     const usbStatusElement = document.getElementById("usbStatus");
     usbStatusElement.textContent = `USB Status: ${usbStatus}`;
     updateButtonVisibility();
