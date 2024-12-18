@@ -19,7 +19,9 @@ function parseKeypressData(keypressData) {
         "13": 74, // J
         "14": 75, // K
         "15": 76, // L
+
         "16": 77, // M
+
         "17": 78, // N
         "18": 79, // O
         "19": 80, // P
