@@ -19,7 +19,9 @@ function parseKeypressData(keypressData) {
         "13": 74, // J
         "14": 75, // K
         "15": 76, // L
+
         "16": 77, // M
+
         "17": 78, // N
         "18": 79, // O
         "19": 80, // P
@@ -98,9 +100,14 @@ function parseKeypressData(keypressData) {
         // Handle key presses
         keys.forEach((key) => {
             if (key !== '0' && !heldKeys[key]) {
-                const flightTime = lastReleaseTime !== null ? timestamp - lastReleaseTime : -1;
+                let flightTime = lastReleaseTime !== null ? timestamp - lastReleaseTime : -1;
                 heldKeys[key] = timestamp; // Record press timestamp
 
+                if (flightTime > 1500) {
+                    flightTime = -1
+                }
+
+                heldKeys[key] = timestamp
                 results.push({
                     VK: HID_KEYCODES[key] || `Unknown(${key})`,
                     HT: null, // HT will be calculated when the key is released
@@ -129,23 +136,25 @@ function parseKeypressData(keypressData) {
         });
     });
 
-    // Assign HT=-1 for any unclosed keys
+    // Assign HT = -1 for any unclosed keys
     Object.keys(heldKeys).forEach((key) => {
         const pressTime = heldKeys[key];
+        const flightTime = lastReleaseTime !== null ? pressTime - lastReleaseTime : -1;
+        const adjustedFlightTime = flightTime > 1500 ? -1 : flightTime;
+
         const result = results.find(
             (r) => r.VK === (HID_KEYCODES[key] || `Unknown(${key})`) && r.HT === null
         );
         if (result) {
             result.HT = -1; // Mark as unclosed
-            result.FT = lastReleaseTime !== null ? pressTime - lastReleaseTime : -1;
+            result.FT = adjustedFlightTime;
         }
     });
 
-    // Sort results by release time for consistent output
-    results.sort((a, b) => (a.HT === -1 ? Infinity : a.HT) - (b.HT === -1 ? Infinity : b.HT));
-
     console.log("Processed Results:", results);
     return results;
+
+
 }
 
 function processKeypressData(keypressData) {
