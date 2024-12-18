@@ -27,9 +27,15 @@ console.log("Parsed Keypress Data:", parsedKeypressData);
 
 if (parsedKeypressData) {
     postKeystrokes(parsedKeypressData).then((response) => {
-        console.log(response);
+        console.log('Received response: ', response);
         if (response.predictions) {
             console.log('Predictions:', response.predictions);
+        }
+        if (response.data) {
+            console.log('Data:', response.data);
+        }
+        if (response.error) {
+            console.error('Error in predictions:', response.error);
         }
     }).catch((error) => {
         console.error('Error posting keystrokes:', error);
@@ -37,3 +43,16 @@ if (parsedKeypressData) {
 } else {
     console.error("Error parsing keypress data");
 }
+//uh idk, hvordan dataen egentligt skal se ud.. her er dataen som service modtager:
+//Received request:
+// [
+//   {'VK': 81, 'HT': 10, 'FT': -1}, 
+//   {'VK': 77, 'HT': 80, 'FT': 133}, 
+//   {'VK': 77, 'HT': 85, 'FT': 830}, 
+//   {'VK': 81, 'HT': 95, 'FT': 1962}, 
+//   {'VK': 68, 'HT': 2015, 'FT': 862}, 
+//   {'VK': 65, 'HT': 84559951, 'FT': -1}
+// ]
+
+// response fra service:
+// received response:  { predictions: [ 1 ] }

@@ -124,7 +124,7 @@ async function postKeystrokes(parsedKeypressData) {
         HT: result.HT || -1,
         FT: result.FT || -1
     }));
-
+    
     try {
         const response = await axios.post(keystrokeAnalyzerAddress, formattedData, {
             headers: {
