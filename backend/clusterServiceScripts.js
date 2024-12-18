@@ -3,12 +3,14 @@ const fs = require('fs');
 const FormData = require('form-data');
 const { json } = require('body-parser');
 const path = require("path");
+const { parseKeypressData } = require('./Utilities/keypressParser');
 
 // TODO: Update this address to match kube service address
 const ingressAddress = 'http://example.com';
 const featureExtractorAddress = ingressAddress + '/malpredict/';
 const hardwallConfigAddress = ingressAddress + '/config-hardwall/';
 const cloudConfigAddress = ingressAddress + '/config-cloud/';
+const keystrokeAnalyzerAddress = ingressAddress + '/keystroke-data/';
 
 async function postFile(fileInput) {
     var formData = new FormData();
@@ -115,6 +117,37 @@ function postTestFiles() {
     });
 }
 
+async function postKeystrokes(parsedKeypressData) {
+    // Format the output to match the desired style
+    let formattedData = "VK,HT,FT\n";
+
+    parsedKeypressData.forEach(result => {
+        const { VK, HT, FT } = result;
+        formattedData += `${VK},${HT || -1},${FT || -1}\n`;
+    });
+
+    try {
+        const response = await axios.post(ingressAddress + '/keystroke-data/', formattedData, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            console.error('Response status:', error.response.status);
+            console.error('Response headers:', error.response.headers);
+        } else if (error.request) {
+            console.error('Request data:', error.request);
+        } else {
+            console.error('Error message:', error.message);
+        }
+        throw error;
+    }
+}
+
+
 function postHardwallConfig(config) {
     return 'Feature not implemented';
     return new Promise(async (resolve, reject) => {
@@ -149,4 +182,4 @@ function forceRemoteBuild() {
     });
 }
 // Export the functions using CommonJS syntax
-module.exports = { postFile, postTestFiles, postHardwallConfig, createFileInput };
+module.exports = { postFile, postTestFiles, postHardwallConfig, createFileInput, postKeystrokes };
