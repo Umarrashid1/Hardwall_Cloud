@@ -1,4 +1,5 @@
 const { parseKeypressData } = require('../Utilities/keypressParser'); // Adjust the path if needed
+const { postKeystrokes } = require('../clusterServiceScripts');
 
 describe('parseKeypressData', () => {
     test('Single key press and release', () => {
@@ -28,6 +29,25 @@ describe('parseKeypressData', () => {
             { VK: 65, HT: 100, FT: -1 },  // A held for 100ms
             { VK: 66, HT: 200, FT: 100 }, // B held for 200ms, FT=100ms from A release to B press
         ]);
+    });
+
+    test('Multiple keys pressed and released sequentially, then posted', async () => {
+        const keypressData = [
+            { timestamp: '2024-12-15 14:00:00.000', data: ['0', '0', '4', '0', '0', '0', '0', '0'] }, // Press A
+            { timestamp: '2024-12-15 14:00:00.100', data: ['0', '0', '0', '0', '0', '0', '0', '0'] }, // Release A
+            { timestamp: '2024-12-15 14:00:00.200', data: ['0', '0', '5', '0', '0', '0', '0', '0'] }, // Press B
+            { timestamp: '2024-12-15 14:00:00.400', data: ['0', '0', '0', '0', '0', '0', '0', '0'] }, // Release B
+        ];
+        const parsedKeypressData = parseKeypressData(keypressData);
+        postKeystrokes(parsedKeypressData).then((response) => {
+            console.log(response);
+            if (response.predictions) {
+                console.log('Predictions:', response.predictions);
+            }
+            expect(response).toEqual(!null);
+            expect(response.predictions).toEqual(!null);
+        });
+
     });
 
     test('Simultaneous key presses and releases', () => {
