@@ -29,7 +29,7 @@ function initializeWebSocket() {
             }
 
             if (data.type === 'aiFindings') {
-                const findings = data.findings;
+                findings = data.findings;
 
                 // Get the container to display findings
                 const scannerOutput = document.getElementById("scannerOutput");
