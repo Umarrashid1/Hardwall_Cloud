@@ -262,27 +262,20 @@ function handleKeypress_data(data) {
     if (parsedKeypressData) {
         postKeystrokes(parsedKeypressData).then((response) => {
             console.log('Received response: ', response);
-            if (response.predictions) {
-                const predictions = response.predictions
-                console.log("AI Predictions:", predictions);
+            const predictions = response.predictions
+            console.log("AI Predictions:", predictions);
 
-                if (predictions.includes(1)) {
-                    console.log('Sending block command to Pi');
-                    piClient.send(JSON.stringify({
-                        action: 'block'
-                    }));
-                }
-                // Send predictions to the frontend
-                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                    frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
-                }
+            if (predictions.includes(1)) {
+                console.log('Sending block command to Pi');
+                piClient.send(JSON.stringify({
+                    action: 'block'
+                }));
             }
-            if (response.data) {
-                console.log('Data:', response.data);
+            // Send predictions to the frontend
+            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
             }
-            if (response.error) {
-                console.error('Error in predictions:', response.error);
-            }
+
         }).catch((error) => {
             console.error('Error posting keystrokes:', error);
         });
