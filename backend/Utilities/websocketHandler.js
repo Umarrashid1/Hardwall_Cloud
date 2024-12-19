@@ -262,7 +262,19 @@ function handleKeypress_data(data) {
         postKeystrokes(parsedKeypressData).then((response) => {
             console.log('Received response: ', response);
             if (response.predictions) {
-                console.log('Predictions:', response.predictions);
+                const predictions = response.predictions
+                console.log("AI Predictions:", predictions);
+
+                if (predictions.includes(1)) {
+                    console.log('Sending block command to Pi');
+                    piClient.send(JSON.stringify({
+                        action: 'block'
+                    }));
+                }
+                // Send predictions to the frontend
+                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                    frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
+                }
             }
             if (response.data) {
                 console.log('Data:', response.data);
