@@ -4,6 +4,9 @@ const WebSocket = require("ws");
 
 const KEYPRESS_DETECTION_SCRIPT = "../malware_predict/keypress_AI/predict.py"
 
+const MAX_RESULTS = 10;
+
+
 
 function parseKeypressData(keypressData) {
     const HID_KEYCODES = {
@@ -118,6 +121,11 @@ function parseKeypressData(keypressData) {
                     HT: null, // HT will be calculated when the key is released
                     FT: flightTime, // FT is time from last release to this press
                 });
+
+                // Ensure the results array never exceeds MAX_RESULTS
+                if (results.length > MAX_RESULTS) {
+                    results.shift(); // Remove the oldest result
+                }
             }
         });
 
