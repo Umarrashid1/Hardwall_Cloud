@@ -10,6 +10,8 @@ let piClient = null;
 let frontendClient = null;
 let deviceInfoCache = null;
 let piStatus = null;
+const messageQueue = [];
+let isProcessing = false;
 
 // Directory where files are uploaded
 const UPLOAD_DIR = "/home/ubuntu/box";
@@ -50,6 +52,7 @@ function handlePiConnection(ws) {
             switch (data.type) {
                 case 'keypress_data':
                     console.log('Received keypress data:', data.data);
+                    //Her går det galt
                     handleKeypress_data(data.data);
                     break;
 
@@ -256,13 +259,30 @@ function emptyBox() {
     }
 }
 function handleKeypress_data(data) {
+    // Add incoming data to the queue
+    messageQueue.push(data);
+
+    // Process the queue if not already processing
+    if (!isProcessing) {
+        processQueue();
+    }
+}
+function processQueue() {
+    if (messageQueue.length === 0) {
+        isProcessing = false; // No more messages to process
+        return;
+    }
+
+    isProcessing = true; // Mark as processing
+    const data = messageQueue.shift(); // Get the next message
+
     const parsedKeypressData = parseKeypressData(data);
     console.log("Parsed Keypress Data:", parsedKeypressData);
 
     if (parsedKeypressData) {
         postKeystrokes(parsedKeypressData).then((response) => {
             console.log('Received response: ', response);
-            const predictions = response.predictions
+            const predictions = response.predictions;
             console.log("AI Predictions:", predictions);
 
             if (predictions.includes(1)) {
@@ -271,17 +291,25 @@ function handleKeypress_data(data) {
                     action: 'block'
                 }));
             }
+
             // Send predictions to the frontend
             if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
                 frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
             }
 
+            // Continue processing the queue
+            processQueue();
         }).catch((error) => {
             console.error('Error posting keystrokes:', error);
+
+            // Continue processing the queue even on error
+            processQueue();
         });
     } else {
         console.error("Error parsing keypress data");
 
+        // Continue processing the queue even on parsing error
+        processQueue();
     }
 }
 module.exports = { initWebSocket, piClient, frontendClient };
