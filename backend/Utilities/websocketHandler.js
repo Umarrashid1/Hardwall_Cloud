@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const keypressParser = require('./keypressParser');
 const {scanDirectoryVirusTotal} = require("./virusTotalAPI"); // Utility for keypress parsing
-const {postFile, createFileInput} = require("../clusterServiceScripts")
+const {postFile, createFileInput, postKeystrokes} = require("../clusterServiceScripts")
+const {parseKeypressData} = require("./keypressParser");
 
 let piClient = null;
 let frontendClient = null;
@@ -35,6 +36,8 @@ function initWebSocket(server) {
 }
 
 
+
+
 function handlePiConnection(ws) {
     console.log('Pi connected via WebSocket');
     piClient = ws;
@@ -47,7 +50,8 @@ function handlePiConnection(ws) {
             switch (data.type) {
                 case 'keypress_data':
                     console.log('Received keypress data:', data.data);
-                    keypressParser.processKeypressData(data.data);
+                    handleKeypress_data(data.data)
+                    //keypressParser.processKeypressData(data.data);
                     break;
 
                 case 'device_summary':
@@ -250,5 +254,28 @@ function emptyBox() {
         console.error('Error emptying the box folder:', error);
     }
 }
+function handleKeypress_data(data) {
+    const parsedKeypressData = parseKeypressData(data);
+    console.log("Parsed Keypress Data:", parsedKeypressData);
 
+    if (parsedKeypressData) {
+        postKeystrokes(parsedKeypressData).then((response) => {
+            console.log('Received response: ', response);
+            if (response.predictions) {
+                console.log('Predictions:', response.predictions);
+            }
+            if (response.data) {
+                console.log('Data:', response.data);
+            }
+            if (response.error) {
+                console.error('Error in predictions:', response.error);
+            }
+        }).catch((error) => {
+            console.error('Error posting keystrokes:', error);
+        });
+    } else {
+        console.error("Error parsing keypress data");
+
+    }
+}
 module.exports = { initWebSocket, piClient, frontendClient };
