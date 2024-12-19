@@ -50,13 +50,14 @@ function handlePiConnection(ws) {
             switch (data.type) {
                 case 'keypress_data':
                     console.log('Received keypress data:', data.data);
-                    handleKeypress_data(data.data)
-                    //keypressParser.processKeypressData(data.data);
+                    handleKeypress_data(data.data);
                     break;
 
                 case 'device_summary':
                     handleDeviceSummary(data);
                     break;
+                //keypressParser.processKeypressData(data.data);
+
 
                 case 'status':
                     handleStatus(data, ws);
