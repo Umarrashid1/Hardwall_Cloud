@@ -4,6 +4,9 @@ const WebSocket = require("ws");
 
 const KEYPRESS_DETECTION_SCRIPT = "../malware_predict/keypress_AI/predict.py"
 
+const MAX_RESULTS = 10;
+
+
 
 function parseKeypressData(keypressData) {
     const HID_KEYCODES = {
@@ -79,15 +82,19 @@ function parseKeypressData(keypressData) {
         "43": 121, // F10
         "44": 122, // F11
         "45": 123, // F12
-
-        // Control Keys
-        "e0": 17, // Ctrl Left
-        "e4": 17, // Ctrl Right
-        "e1": 16, // Shift Left
-        "e2": 18, // Alt Left
-        "e6": 18, // Alt Right
         "e3": 91, // Left Windows
         "e7": 92, // Left Windows/Command
+
+
+        // Modifier keys (first byte masks)
+        "02": 16,  // Left Shift
+        "20": 16,  // Right Shift
+        "01": 17,  // Left Control
+        "10": 17,  // Right Control
+        "04": 18,  // Left Alt
+        "40": 18,  // Right Alt
+
+
     };
 
     const results = [];
@@ -114,6 +121,11 @@ function parseKeypressData(keypressData) {
                     HT: null, // HT will be calculated when the key is released
                     FT: flightTime, // FT is time from last release to this press
                 });
+
+                // Ensure the results array never exceeds MAX_RESULTS
+                if (results.length > MAX_RESULTS) {
+                    results.shift(); // Remove the oldest result
+                }
             }
         });
 

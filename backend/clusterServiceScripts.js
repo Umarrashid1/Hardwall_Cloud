@@ -131,6 +131,7 @@ async function postKeystrokes(parsedKeypressData) {
                 'Content-Type': 'application/json'
             }
         });
+
         return response.data;
     } catch (error) {
         if (error.response) {
