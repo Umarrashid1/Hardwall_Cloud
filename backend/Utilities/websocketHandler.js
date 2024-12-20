@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const keypressParser = require('./keypressParser');
 const {scanDirectoryVirusTotal} = require("./virusTotalAPI"); // Utility for keypress parsing
-const {postFile, createFileInput} = require("../clusterServiceScripts")
+const {postFile, createFileInput, postKeystrokes} = require("../clusterServiceScripts")
+const {parseKeypressData} = require("./keypressParser");
 
 let piClient = null;
 let frontendClient = null;
@@ -35,6 +36,8 @@ function initWebSocket(server) {
 }
 
 
+
+
 function handlePiConnection(ws) {
     console.log('Pi connected via WebSocket');
     piClient = ws;
@@ -47,12 +50,15 @@ function handlePiConnection(ws) {
             switch (data.type) {
                 case 'keypress_data':
                     console.log('Received keypress data:', data.data);
-                    keypressParser.processKeypressData(data.data);
+                    //Her går det galt
+                    handleKeypress_data(data.data);
                     break;
 
                 case 'device_summary':
                     handleDeviceSummary(data);
                     break;
+                //keypressParser.processKeypressData(data.data);
+
 
                 case 'status':
                     handleStatus(data, ws);
@@ -187,6 +193,8 @@ function handleFileList(data, ws) {
 
         // Scanning with VirusTotal
         scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+        // Empty upload dir
+        emptyBox()
     }
 
 }
@@ -224,6 +232,57 @@ function forwardCommandToPi(command) {
 
         default:
             console.warn('Unhandled command action:', command.action);
+    }
+}
+function emptyBox() {
+    try {
+        fs.readdir(UPLOAD_DIR, (err, files) => {
+            if (err) {
+                console.error(`Failed to read files in ${UPLOAD_DIR}:`, err);
+                return;
+            }
+            files.forEach((file) => {
+                const filePath = path.join(UPLOAD_DIR, file);
+                fs.unlink(filePath, (err) => {
+                    if (err) {
+                        console.error(`Failed to delete file ${filePath}:`, err);
+                    } else {
+                        console.log(`Deleted file: ${filePath}`);
+                    }
+                });
+            });
+        });
+    } catch (error) {
+        console.error('Error emptying the box folder:', error);
+    }
+}
+function handleKeypress_data(data) {
+    const parsedKeypressData = parseKeypressData(data);
+    console.log("Parsed Keypress Data:", parsedKeypressData);
+
+    if (parsedKeypressData) {
+        postKeystrokes(parsedKeypressData).then((response) => {
+            console.log('Received response: ', response);
+            const predictions = response.predictions
+            console.log("AI Predictions:", predictions);
+
+            if (predictions.includes(1)) {
+                console.log('Sending block command to Pi');
+                piClient.send(JSON.stringify({
+                    action: 'block'
+                }));
+            }
+            // Send predictions to the frontend
+            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
+            }
+
+        }).catch((error) => {
+            console.error('Error posting keystrokes:', error);
+        });
+    } else {
+        console.error("Error parsing keypress data");
+
     }
 }
 module.exports = { initWebSocket, piClient, frontendClient };
