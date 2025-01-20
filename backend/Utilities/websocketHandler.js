@@ -50,7 +50,6 @@ function handlePiConnection(ws) {
             switch (data.type) {
                 case 'keypress_data':
                     console.log('Received keypress data:', data.data);
-                    //Her går det galt
                     handleKeypress_data(data.data);
                     break;
 
@@ -133,6 +132,7 @@ function handleDeviceSummary(data) {
     deviceInfoCache = data.device_info;
     if (data.device_info.drivers && data.device_info.drivers.includes('usb-storage')) {
         console.log('Storage device detected:', data.device_info);
+        return
 
     }
     notifyFrontend({
@@ -188,8 +188,10 @@ function handleFileList(data, ws) {
         }).catch((error) => {
             console.error('Error processing files:', error);
         });
-
-
+        notifyFrontend({
+            type: 'device_summary',
+            device_info: data.device_info
+        });
 
         // Scanning with VirusTotal
         scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
