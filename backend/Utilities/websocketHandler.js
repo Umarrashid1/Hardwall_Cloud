@@ -148,10 +148,8 @@ function handleDeviceSummary(data) {
 
 function handleFileList(data, ws) {
     console.log('Received file list from Pi:', data.files);
-    let filePaths = []
     const allFilesValid = data.files.every((file) => {
         const filePath = path.join(UPLOAD_DIR, path.basename(file.path));
-        filePaths.push(filePath)
         if (!fs.existsSync(filePath)) {
             console.error(`File not found: ${filePath}`);
             return false;
@@ -190,7 +188,7 @@ function handleFileList(data, ws) {
         });
 
         // Scanning with VirusTotal
-        scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
+        //scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
         // Empty upload dir
         emptyBox()
     }
