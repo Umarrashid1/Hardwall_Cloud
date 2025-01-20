@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { exec } = require("child_process");
+const { spawn } = require("child_process");
 const WebSocket = require("ws");
 
 const KEYPRESS_DETECTION_SCRIPT = "../malware_predict/keypress_AI/predict.py"
@@ -171,21 +171,17 @@ function parseKeypressData(keypressData) {
 }
 
 function processKeypressData(keypressData, piClient, frontendClient) {
-
     const results = parseKeypressData(keypressData);
-    const csvFilePath = ('keystroke_data.csv');
-    csvFilePath.truncate
+    const csvFilePath = 'keystroke_data.csv';
 
     console.log("Formatted Keypress Data:", results);
 
     // Format the output to match the desired style
     let formattedOutput = "VK,HT,FT\n";
-
     results.forEach(result => {
-        const { VK, HT, FT } = result;
+        const {VK, HT, FT} = result;
         formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
     });
-
 
     console.log("Formatted Output:", formattedOutput);
     fs.writeFile(csvFilePath, formattedOutput, 'utf8', (err) => {
@@ -196,28 +192,38 @@ function processKeypressData(keypressData, piClient, frontendClient) {
 
         console.log(`Formatted keypress data saved to ${csvFilePath}`);
 
-        // Execute the Python script
-        exec(`python3 ${KEYPRESS_DETECTION_SCRIPT}`, (error, stdout, stderr) => {
-            if (error) {
-                console.error("Error during Python script execution:", error.message);
+        // Execute the Python script using spawn
+        const pythonProcess = spawn('python3', [KEYPRESS_DETECTION_SCRIPT]);
+
+        let scriptOutput = '';
+        let scriptError = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            scriptOutput += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            scriptError += data.toString();
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code !== 0) {
+                console.error(`Python script exited with code ${code}`);
+                console.error("Python script error output:", scriptError);
+                return;
             }
-            if (stderr) {
-                console.error("Python script error output:", stderr);
-            }
+
+            console.log("Raw Python script output:", scriptOutput); // Log the raw output for debugging
 
             // Parse and log the predictions
             try {
-                console.log("Raw Python script output:", stdout); // Log the raw output for debugging
-
-                // Extract the JSON-like line (skip non-JSON lines)
-                const lines = stdout.split('\n'); // Split output into lines
+                const lines = scriptOutput.split('\n'); // Split output into lines
                 const jsonLine = lines.find(line => line.trim().startsWith('[')); // Find the line that starts with '['
 
                 if (!jsonLine) {
                     throw new Error("No valid JSON output found in Python script output");
                 }
 
-                // Parse the extracted JSON line
                 const predictions = JSON.parse(jsonLine);
                 console.log("AI Predictions:", predictions);
 
@@ -227,17 +233,16 @@ function processKeypressData(keypressData, piClient, frontendClient) {
                         action: 'block'
                     }));
                 }
-                // Send predictions to the frontend
+
                 if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                    frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
+                    frontendClient.send(JSON.stringify({type: "predictions", predictions}));
                 }
 
             } catch (parseError) {
                 console.error("Error parsing Python script output:", parseError.message);
-                console.error("Raw Python script output:", stdout); // Log raw output for debugging
+                console.error("Raw Python script output:", scriptOutput);
             }
-
         });
     });
 }
-module.exports = { processKeypressData, parseKeypressData };
+    module.exports = { processKeypressData, parseKeypressData };
