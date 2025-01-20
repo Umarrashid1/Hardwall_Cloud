@@ -170,7 +170,7 @@ function parseKeypressData(keypressData) {
 
 }
 
-function processKeypressData(keypressData) {
+function processKeypressData(keypressData, piClient) {
     const results = parseKeypressData(keypressData);
 
     console.log("Formatted Keypress Data:", results);
@@ -193,7 +193,6 @@ function processKeypressData(keypressData) {
         }
 
         console.log(`Formatted keypress data saved to ${csvFilePath}`);
-
 
         // Execute the Python script
         exec(`python3 ${KEYPRESS_DETECTION_SCRIPT}`, (error, stdout, stderr) => {
