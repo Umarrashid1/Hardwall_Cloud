@@ -4,7 +4,7 @@ const fs = require('fs');
 const keypressParser = require('./keypressParser');
 const {scanDirectoryVirusTotal} = require("./virusTotalAPI"); // Utility for keypress parsing
 const {postFile, createFileInput, postKeystrokes} = require("../clusterServiceScripts")
-const {parseKeypressData} = require("./keypressParser");
+const {parseKeypressData, processKeypressData} = require("./keypressParser");
 const { spawn } = require('child_process');
 
 
@@ -199,6 +199,7 @@ function handleFileList(data, ws) {
                             type: 'aiFindings',
                             findings: findings
                         });
+                        emptyBox()
 
                     } catch (parseErr) {
                         console.error('Error parsing JSON:', parseErr);
@@ -213,9 +214,7 @@ function handleFileList(data, ws) {
 
 
 
-        notifyFrontend({
-            type: 'show_button',
-        });
+
 
         // Scanning with VirusTotal
         //scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
@@ -282,32 +281,6 @@ function emptyBox() {
     }
 }
 function handleKeypress_data(data) {
-    const parsedKeypressData = parseKeypressData(data);
-    console.log("Parsed Keypress Data:", parsedKeypressData);
-
-    if (parsedKeypressData) {
-        postKeystrokes(parsedKeypressData).then((response) => {
-            console.log('Received response: ', response);
-            const predictions = response.predictions
-            console.log("AI Predictions:", predictions);
-
-            if (predictions.includes(1)) {
-                console.log('Sending block command to Pi');
-                piClient.send(JSON.stringify({
-                    action: 'block'
-                }));
-            }
-            // Send predictions to the frontend
-            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
-            }
-
-        }).catch((error) => {
-            console.error('Error posting keystrokes:', error);
-        });
-    } else {
-        console.error("Error parsing keypress data");
-
-    }
+    processKeypressData(data)
 }
 module.exports = { initWebSocket, piClient, frontendClient };
