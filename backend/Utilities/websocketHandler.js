@@ -190,7 +190,7 @@ function handleFileList(data, ws) {
         });
         notifyFrontend({
             type: 'device_summary',
-            device_info: data.device_info
+            device_info: deviceInfoCache
         });
 
         // Scanning with VirusTotal
