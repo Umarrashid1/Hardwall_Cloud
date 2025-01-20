@@ -190,7 +190,7 @@ function handleFileList(data, ws) {
         // Scanning with VirusTotal
         //scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
         // Empty upload dir
-        emptyBox()
+        //emptyBox()
     }
 
 }
