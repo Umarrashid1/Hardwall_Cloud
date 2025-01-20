@@ -170,8 +170,11 @@ function parseKeypressData(keypressData) {
 
 }
 
-function processKeypressData(keypressData, piClient) {
+function processKeypressData(keypressData, piClient, frontendClient) {
+
     const results = parseKeypressData(keypressData);
+    const csvFilePath = ('keystroke_data.csv');
+    csvFilePath.truncate
 
     console.log("Formatted Keypress Data:", results);
 
@@ -182,7 +185,6 @@ function processKeypressData(keypressData, piClient) {
         const { VK, HT, FT } = result;
         formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
     });
-    const csvFilePath = ('keystroke_data.csv');
 
 
     console.log("Formatted Output:", formattedOutput);

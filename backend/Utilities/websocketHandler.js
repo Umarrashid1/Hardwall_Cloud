@@ -281,6 +281,6 @@ function emptyBox() {
     }
 }
 function handleKeypress_data(data) {
-    processKeypressData(data, piClient)
+    processKeypressData(data, piClient, frontendClient)
 }
 module.exports = { initWebSocket, piClient, frontendClient };
