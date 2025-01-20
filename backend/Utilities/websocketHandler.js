@@ -280,7 +280,7 @@ function emptyBox() {
         console.error('Error emptying the box folder:', error);
     }
 }
-function handleKeypress_data(data) {
-    processKeypressData(data, piClient, frontendClient)
+async function handleKeypress_data(data) {
+    await processKeypressData(data, piClient, frontendClient)
 }
 module.exports = { initWebSocket, piClient, frontendClient };
