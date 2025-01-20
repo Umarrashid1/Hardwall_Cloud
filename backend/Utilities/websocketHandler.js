@@ -5,6 +5,8 @@ const keypressParser = require('./keypressParser');
 const {scanDirectoryVirusTotal} = require("./virusTotalAPI"); // Utility for keypress parsing
 const {postFile, createFileInput, postKeystrokes} = require("../clusterServiceScripts")
 const {parseKeypressData} = require("./keypressParser");
+const { spawn } = require('child_process');
+
 
 let piClient = null;
 let frontendClient = null;
@@ -135,7 +137,6 @@ function handleDeviceSummary(data) {
         notifyFrontend({
             type: 'storage device',
         });
-
     }
     notifyFrontend({
         type: 'device_summary',
@@ -167,29 +168,23 @@ function handleFileList(data, ws) {
 
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
-        console.log(filePaths)
-        let files = createFileInput(filePaths)
-        console.log(files)
+        // Path to the Python script
+        const pythonProcess = spawn('python3', ['/home/ubuntu/hardwall/malware_predict/feature_extraction.py']);
 
-        postFile(files).then((findings) => {
-            console.log('files processed:', findings);
-            findings.forEach(file => {
-                try {
-                    console.log(file.file_name)
-                    console.log(file.results)
-                } catch (error) {
-                    console.log('error logging file.bullshit')
-                }
-            })
-            frontendClient.send(
-                JSON.stringify({
-                    type: 'aiFindings',
-                    findings: findings
-                })
-            )
-        }).catch((error) => {
-            console.error('Error processing files:', error);
+        pythonProcess.stdout.on('data', (data) => {
+            console.log(`Output: ${data}`);
         });
+
+        pythonProcess.stderr.on('data', (error) => {
+            console.error(`Error: ${error}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            console.log(`Python script exited with code ${code}`);
+        });
+
+
+
         notifyFrontend({
             type: 'show_button',
         });
