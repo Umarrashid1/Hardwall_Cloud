@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { spawn } = require("child_process");
+const { spawnSync } = require("child_process");
 const WebSocket = require("ws");
 
 const KEYPRESS_DETECTION_SCRIPT = "../malware_predict/keypress_AI/predict.py"
@@ -180,46 +180,43 @@ function processKeypressData(keypressData, piClient, frontendClient) {
     let formattedOutput = "VK,HT,FT\n";
     results.forEach(result => {
         const {VK, HT, FT} = result;
-        formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
+        formattedOutput += `${VK},${HT ?? -1},${FT ?? -1}\n`;
     });
 
     console.log("Formatted Output:", formattedOutput);
-    fs.writeFile(csvFilePath, formattedOutput, 'utf8', (err) => {
-        if (err) {
-            console.error("Error writing to CSV file:", err);
-            return;
-        }
 
-        console.log(`Formatted keypress data saved to ${csvFilePath}`);
+    // Clear the file first (truncate) then write
+    fs.truncate(csvFilePath, 0, function() {
+        console.log('CSV file truncated');
 
-        // Execute the Python script using spawn
-        const pythonProcess = spawn('python3', [KEYPRESS_DETECTION_SCRIPT]);
+        fs.writeFile(csvFilePath, formattedOutput, 'utf8', (err) => {
+            if (err) {
+                console.error("Error writing to CSV file:", err);
+                return;
+            }
 
-        let scriptOutput = '';
-        let scriptError = '';
+            console.log(`Formatted keypress data saved to ${csvFilePath}`);
 
-        pythonProcess.stdout.on('data', (data) => {
-            scriptOutput += data.toString();
-        });
+            // Execute the Python script *synchronously*
+            const pythonProcess = spawnSync('python3', [KEYPRESS_DETECTION_SCRIPT]);
+            const scriptOutput = pythonProcess.stdout.toString();
+            const scriptError = pythonProcess.stderr.toString();
+            const code = pythonProcess.status;  // Exit code of the script
 
-        pythonProcess.stderr.on('data', (data) => {
-            scriptError += data.toString();
-        });
-
-        pythonProcess.on('close', (code) => {
             if (code !== 0) {
+                // Python script errored out
                 console.error(`Python script exited with code ${code}`);
                 console.error("Python script error output:", scriptError);
                 return;
             }
 
-            console.log("Raw Python script output:", scriptOutput); // Log the raw output for debugging
+            console.log("Raw Python script output:", scriptOutput);
 
             // Parse and log the predictions
             try {
-                const lines = scriptOutput.split('\n'); // Split output into lines
-                const jsonLine = lines.find(line => line.trim().startsWith('[')); // Find the line that starts with '['
-
+                const lines = scriptOutput.split('\n');
+                // Find the first line that looks like valid JSON
+                const jsonLine = lines.find(line => line.trim().startsWith('['));
                 if (!jsonLine) {
                     throw new Error("No valid JSON output found in Python script output");
                 }
@@ -227,15 +224,15 @@ function processKeypressData(keypressData, piClient, frontendClient) {
                 const predictions = JSON.parse(jsonLine);
                 console.log("AI Predictions:", predictions);
 
+                // If predictions include "1", send block command
                 if (predictions.includes(1)) {
                     console.log('Sending block command to Pi');
-                    piClient.send(JSON.stringify({
-                        action: 'block'
-                    }));
+                    piClient.send(JSON.stringify({ action: 'block' }));
                 }
 
+                // Send predictions to frontend if websocket is open
                 if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                    frontendClient.send(JSON.stringify({type: "predictions", predictions}));
+                    frontendClient.send(JSON.stringify({ type: "predictions", predictions }));
                 }
 
             } catch (parseError) {
