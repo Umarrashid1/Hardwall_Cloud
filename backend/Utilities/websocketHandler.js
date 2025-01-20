@@ -171,14 +171,58 @@ function handleFileList(data, ws) {
 
         pythonProcess.stdout.on('data', (data) => {
             console.log(`Output: ${data}`);
+            const pythonProcess = spawn('python3', ['/home/ubuntu/hardwall/malware_predict/run_scanner.py']);
+
+            pythonProcess.stdout.on('data', (data) => {
+                console.log(`Output: ${data}`);
+                const filePath = '/home/ubuntu/box/scanning_results.json';
+
+                fs.readFile(filePath, 'utf-8', (err, data) => {
+                    if (err) {
+                        console.error('Error reading the file:', err);
+                        return;
+                    }
+
+                    try {
+                        // Parse the JSON content
+                        const findings = JSON.parse(data);
+                        console.log('JSON Content:', findings);
+                        notifyFrontend({
+                            type: 'aiFindings',
+                            findings: findings
+                        });
+
+                    } catch (parseErr) {
+                        console.error('Error parsing JSON:', parseErr);
+                    }
+                });
+
+            });
+
+            pythonProcess.stderr.on('data', (error) => {
+                console.error(`Error: ${error}`);
+                emptyBox()
+
+            });
+
+            pythonProcess.on('close', (code) => {
+                console.log(`Python script exited with code ${code}`);
+                emptyBox()
+
+            });
+
         });
 
         pythonProcess.stderr.on('data', (error) => {
             console.error(`Error: ${error}`);
+            emptyBox()
+
         });
 
         pythonProcess.on('close', (code) => {
             console.log(`Python script exited with code ${code}`);
+            emptyBox()
+
         });
 
 
@@ -189,8 +233,7 @@ function handleFileList(data, ws) {
 
         // Scanning with VirusTotal
         //scanDirectoryVirusTotal('/home/ubuntu/box', frontendClient).then(r => { console.log('Scanning completed successfully.') }).catch(e => { console.error('Error during scanning:', e) });
-        // Empty upload dir
-        //emptyBox()
+
     }
 
 }
