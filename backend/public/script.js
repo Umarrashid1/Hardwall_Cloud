@@ -43,8 +43,9 @@ function initializeWebSocket() {
             }
 
             if (data.type === 'aiFindings') {
-                console.log(data.findings)
-                findings = data.findings;
+                console.log(data.findings);
+                const findings = data.findings;
+
                 // Get the container to display findings
                 const scannerOutput = document.getElementById("scannerOutput");
                 if (!scannerOutput) {
@@ -60,25 +61,14 @@ function initializeWebSocket() {
                     const fileDiv = document.createElement('div');
                     fileDiv.classList.add('file-result');
 
-                    let formattedResults = "";
-
-                    // Check if results is an array and format Prediction and Probability
-                    if (Array.isArray(file.results) && file.results.length > 0) {
-                        formattedResults = file.results.map(result => {
-                            return `
-                    <strong>Prediction:</strong> ${result.Prediction}<br>
-                    <strong>Probability:</strong> ${(result.Probability * 100).toFixed(2)}%
-                `;
-                        }).join("");
-                    } else {
-                        formattedResults = "No Results";
-                    }
-
-                    // Add the file name and results to the container
+                    // Display file information
                     fileDiv.innerHTML = `
-            <strong>File:</strong> ${file.file_name || "Unknown"}<br>
-            ${formattedResults}
+            <strong>File:</strong> ${file.Name || "Unknown"}<br>
+            <strong>Prediction:</strong> ${file.Prediction || "Unknown"}<br>
+            <strong>Probability:</strong> ${(file.Probability * 100).toFixed(2) || "0.00"}%
         `;
+
+                    // Append the formatted result to the container
                     scannerOutput.appendChild(fileDiv);
                 });
             }
