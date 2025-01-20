@@ -171,61 +171,78 @@ function parseKeypressData(keypressData) {
 }
 
 function processKeypressData(keypressData, piClient, frontendClient) {
-    // 1) Parse the raw data into {VK, HT, FT} objects
     const results = parseKeypressData(keypressData);
+    const csvFilePath = 'keystroke_data.csv';
 
-    // 2) Spawn Python and pass data via STDIN
-    const pythonProcess = spawn("python3", [KEYPRESS_DETECTION_SCRIPT]);
+    console.log("Formatted Keypress Data:", results);
 
-    let scriptOutput = "";
-    let scriptError = "";
-
-    // Collect output from Python
-    pythonProcess.stdout.on("data", (data) => {
-        scriptOutput += data.toString();
+    // Format the output to match the desired style
+    let formattedOutput = "VK,HT,FT\n";
+    results.forEach(result => {
+        const {VK, HT, FT} = result;
+        formattedOutput += `${VK},${HT || -1},${FT || -1}\n`;
     });
 
-    // Collect errors from Python
-    pythonProcess.stderr.on("data", (data) => {
-        scriptError += data.toString();
-    });
-
-    // When Python closes, process the output
-    pythonProcess.on("close", (code) => {
-        if (code !== 0) {
-            console.error(`Python script exited with code ${code}`);
-            console.error("Python script error output:", scriptError);
+    console.log("Formatted Output:", formattedOutput);
+    fs.writeFile(csvFilePath, formattedOutput, 'utf8', (err) => {
+        if (err) {
+            console.error("Error writing to CSV file:", err);
             return;
         }
 
-        console.log("Raw Python script output:", scriptOutput);
+        console.log(`Formatted keypress data saved to ${csvFilePath}`);
 
-        // Parse output (which should be JSON) and handle predictions
-        try {
-            // The Python script will print something like: [0, 1, 0, ...]
-            const predictions = JSON.parse(scriptOutput);
-            console.log("AI Predictions:", predictions);
+        // Execute the Python script using spawn
+        const pythonProcess = spawn('python3', [KEYPRESS_DETECTION_SCRIPT]);
 
-            // Example: if any of them is '1', do block
-            if (predictions.includes(1)) {
-                console.log("Sending block command to Pi");
-                piClient.send(JSON.stringify({ action: "block" }));
+        let scriptOutput = '';
+        let scriptError = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            scriptOutput += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            scriptError += data.toString();
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code !== 0) {
+                console.error(`Python script exited with code ${code}`);
+                console.error("Python script error output:", scriptError);
+                return;
             }
 
-            // Also forward predictions to your frontend
-            if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
-                frontendClient.send(
-                    JSON.stringify({ type: "predictions", predictions })
-                );
+            console.log("Raw Python script output:", scriptOutput); // Log the raw output for debugging
+
+            // Parse and log the predictions
+            try {
+                const lines = scriptOutput.split('\n'); // Split output into lines
+                const jsonLine = lines.find(line => line.trim().startsWith('[')); // Find the line that starts with '['
+
+                if (!jsonLine) {
+                    throw new Error("No valid JSON output found in Python script output");
+                }
+
+                const predictions = JSON.parse(jsonLine);
+                console.log("AI Predictions:", predictions);
+
+                if (predictions.includes(1)) {
+                    console.log('Sending block command to Pi');
+                    piClient.send(JSON.stringify({
+                        action: 'block'
+                    }));
+                }
+
+                if (frontendClient && frontendClient.readyState === WebSocket.OPEN) {
+                    frontendClient.send(JSON.stringify({type: "predictions", predictions}));
+                }
+
+            } catch (parseError) {
+                console.error("Error parsing Python script output:", parseError.message);
+                console.error("Raw Python script output:", scriptOutput);
             }
-        } catch (parseError) {
-            console.error("Error parsing Python script output:", parseError.message);
-            console.error("Raw Python script output:", scriptOutput);
-        }
+        });
     });
-
-    // 3) Send our keystrokes to Python via STDIN
-    pythonProcess.stdin.write(JSON.stringify(results));
-    // End the input stream to let Python know we've sent all data
-    pythonProcess.stdin.end();
-}    module.exports = { processKeypressData, parseKeypressData };
+}
+    module.exports = { processKeypressData, parseKeypressData };
