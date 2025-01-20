@@ -180,7 +180,7 @@ function processKeypressData(keypressData, piClient, frontendClient) {
     let formattedOutput = "VK,HT,FT\n";
     results.forEach(result => {
         const {VK, HT, FT} = result;
-        formattedOutput += `${VK},${HT ?? -1},${FT ?? -1}\n`;
+        formattedOutput += `${VK},${(HT !== undefined && HT !== null) ? HT : -1},${(FT !== undefined && FT !== null) ? FT : -1}\n`;
     });
 
     console.log("Formatted Output:", formattedOutput);
