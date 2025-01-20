@@ -167,11 +167,19 @@ function handleFileList(data, ws) {
     if (allFilesValid) {
         console.log('All files validated. Running feature extraction and scanning...');
         // Path to the Python script
-        const pythonProcess = spawn('python3', ['/home/ubuntu/hardwall/malware_predict/feature_extraction.py']);
+        let pythonProcess = spawn('python3', ['/home/ubuntu/hardwall/malware_predict/feature_extraction.py']);
 
         pythonProcess.stdout.on('data', (data) => {
             console.log(`Output: ${data}`);
-            const pythonProcess = spawn('python3', ['/home/ubuntu/hardwall/malware_predict/run_scanner.py']);
+        });
+
+        pythonProcess.stderr.on('data', (error) => {
+            console.error(`Error: ${error}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            console.log(`Python script exited with code ${code}`);
+            pythonProcess = spawn('python3', ['/home/ubuntu/hardwall/malware_predict/run_scanner.py']);
 
             pythonProcess.stdout.on('data', (data) => {
                 console.log(`Output: ${data}`);
@@ -198,32 +206,10 @@ function handleFileList(data, ws) {
                 });
 
             });
-
-            pythonProcess.stderr.on('data', (error) => {
-                console.error(`Error: ${error}`);
-                emptyBox()
-
-            });
-
-            pythonProcess.on('close', (code) => {
-                console.log(`Python script exited with code ${code}`);
-                emptyBox()
-
-            });
-
         });
 
-        pythonProcess.stderr.on('data', (error) => {
-            console.error(`Error: ${error}`);
-            emptyBox()
 
-        });
 
-        pythonProcess.on('close', (code) => {
-            console.log(`Python script exited with code ${code}`);
-            emptyBox()
-
-        });
 
 
 
