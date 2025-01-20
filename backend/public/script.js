@@ -43,8 +43,8 @@ function initializeWebSocket() {
             }
 
             if (data.type === 'aiFindings') {
+                console.log(data.findings)
                 findings = data.findings;
-
                 // Get the container to display findings
                 const scannerOutput = document.getElementById("scannerOutput");
                 if (!scannerOutput) {
