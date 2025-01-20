@@ -2,6 +2,8 @@ let piConnected = false;
 let usbStatus = "Unknown";
 let deviceInfoReceived = false;
 let socket;
+let storage = null;
+
 
 function initializeWebSocket() {
     socket = new WebSocket('ws://130.225.37.50:3000');
@@ -15,6 +17,7 @@ function initializeWebSocket() {
         let scanResults;
         let filePath;
         let findings;
+
         try {
             const data = JSON.parse(event.data);
 
@@ -26,6 +29,17 @@ function initializeWebSocket() {
             if (data.type === "status") {
                 usbStatus = data.piStatus;
                 updateUSBStatus();
+            }
+            if (data.type === "show_button") {
+                usbStatus = data.piStatus;
+                storage = 0
+                updateUSBStatus();
+            }
+
+
+            if (data.type === "storage_device") {
+                usbStatus = data.piStatus;
+                storage = 1
             }
 
             if (data.type === 'aiFindings') {
@@ -149,7 +163,9 @@ function displayDeviceSummary(deviceInfo) {
     `;
     deviceInfoElement.innerHTML = formattedInfo;
 
-    updateButtonVisibility()
+    if(storage == null){
+        updateButtonVisibility()
+    }
 }
 
 

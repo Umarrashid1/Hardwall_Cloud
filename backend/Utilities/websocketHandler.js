@@ -132,7 +132,9 @@ function handleDeviceSummary(data) {
     deviceInfoCache = data.device_info;
     if (data.device_info.drivers && data.device_info.drivers.includes('usb-storage')) {
         console.log('Storage device detected:', data.device_info);
-        return
+        notifyFrontend({
+            type: 'storage device',
+        });
 
     }
     notifyFrontend({
@@ -189,8 +191,7 @@ function handleFileList(data, ws) {
             console.error('Error processing files:', error);
         });
         notifyFrontend({
-            type: 'device_summary',
-            device_info: deviceInfoCache
+            type: 'show_button',
         });
 
         // Scanning with VirusTotal
